@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GRAMY ⚔️ Grammaire Anglaise – Bac Pro 2nde</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --grass:#5D8A3C;--grass-dk:#3D6A1C;--dirt:#8B5E3C;--stone:#7A7A7A;
+  --stone-dk:#3A3A3A;--stone-lt:#A0A0A0;--diamond:#4BDFE8;--gold:#FFD700;
+  --red:#C0392B;--green:#27AE60;--bg:#0D1117;--bg2:#161B22;--bg3:#1C2128;
+  --text:#E8E8E8;--text-dim:#888;--iron:#C0C0C0;
+}
+body{font-family:'Press Start 2P',monospace;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 32px),repeating-linear-gradient(0deg,rgba(255,255,255,0.015) 0,rgba(255,255,255,0.015) 1px,transparent 1px,transparent 32px);pointer-events:none;z-index:0}
+#app{flex:1;padding:1.2rem;max-width:920px;margin:0 auto;width:100%;position:relative;z-index:1}
+
+/* MINECRAFT BOXES */
+.mc-box{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);position:relative}
+.mc-box::after{content:'';position:absolute;inset:2px;border:1px solid rgba(0,0,0,.4);pointer-events:none}
+
+/* BUTTONS */
+.mc-btn{display:inline-block;font-family:'Press Start 2P',monospace;font-size:.55rem;padding:.7rem 1.2rem;cursor:pointer;background:var(--stone);color:var(--text);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);transition:transform .1s,filter .1s;user-select:none;text-decoration:none;letter-spacing:0}
+.mc-btn:hover{filter:brightness(1.2)}
+.mc-btn:active{transform:translate(2px,2px);border-color:var(--stone-dk) var(--stone-lt) var(--stone-lt) var(--stone-dk)}
+.mc-btn.green{background:var(--grass-dk);border-color:var(--grass) #1A4A0A #1A4A0A var(--grass)}
+.mc-btn.red{background:#7A0A0A;border-color:var(--red) #500 #500 var(--red)}
+.mc-btn.gold{background:#8A6B00;border-color:var(--gold) #5A4000 #5A4000 var(--gold);color:#000}
+.mc-btn.diamond{background:#006080;border-color:var(--diamond) #004050 #004050 var(--diamond)}
+.mc-btn.grey{background:#444;border-color:#666 #222 #222 #666}
+
+/* HOME */
+.home-wrap{text-align:center;padding:1.5rem 0}
+.home-title{font-size:1.6rem;color:var(--gold);text-shadow:3px 3px 0 #7A6000,6px 6px 0 rgba(0,0,0,.6);line-height:1.5;margin-bottom:.5rem}
+.home-sub{font-size:.42rem;color:var(--text-dim);margin-bottom:2rem;line-height:2}
+.home-cards{display:flex;gap:1.5rem;justify-content:center;flex-wrap:wrap;margin:2rem 0}
+.home-card{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:2rem 1.5rem;cursor:pointer;min-width:200px;transition:transform .2s,filter .2s;flex:1;max-width:280px}
+.home-card:hover{transform:translateY(-6px);filter:brightness(1.15)}
+.home-card .hc-icon{font-size:3rem;margin-bottom:1rem}
+.home-card h2{font-size:.65rem;color:var(--gold);margin-bottom:.7rem}
+.home-card p{font-size:.4rem;color:var(--text-dim);line-height:2}
+
+/* LOGIN */
+.login-wrap{max-width:420px;margin:2rem auto}
+.login-wrap h2{font-size:.7rem;color:var(--gold);text-align:center;margin-bottom:1.5rem}
+.form-group{margin-bottom:1.2rem}
+.form-group label{display:block;font-size:.45rem;color:var(--text-dim);margin-bottom:.5rem}
+.form-group input,.form-group select{width:100%;background:#050A14;border:3px solid var(--stone-dk);border-right-color:var(--stone-lt);border-bottom-color:var(--stone-lt);color:var(--text);font-family:'Press Start 2P',monospace;font-size:.6rem;padding:.7rem;outline:none}
+.form-group input:focus{border-color:var(--diamond)}
+.form-group .hint{font-size:.38rem;color:var(--text-dim);margin-top:.4rem;line-height:2}
+.form-row{display:flex;gap:1rem}
+.form-row .form-group{flex:1}
+.msg-err{color:var(--red);font-size:.45rem;margin-top:.5rem;text-align:center}
+.msg-ok{color:var(--green);font-size:.45rem;margin-top:.5rem;text-align:center}
+
+/* NAV */
+.nav-back{font-size:.45rem;color:var(--diamond);cursor:pointer;margin-bottom:1.2rem;display:inline-flex;align-items:center;gap:.5rem}
+.nav-back:hover{color:var(--gold)}
+.page-header{margin-bottom:1.3rem}
+.page-header h1{font-size:.85rem;color:var(--gold);text-shadow:2px 2px 0 #7A6000;margin-bottom:.5rem}
+.page-header p{font-size:.4rem;color:var(--text-dim);line-height:2}
+
+/* STUDENT INFO BAR */
+.student-bar{display:flex;align-items:center;justify-content:space-between;background:var(--bg3);border:2px solid var(--stone-dk);padding:.5rem 1rem;margin-bottom:1.2rem;font-size:.4rem;flex-wrap:wrap;gap:.5rem}
+.student-bar .sname{color:var(--diamond)}
+.student-bar .sclass{color:var(--gold)}
+
+/* THEMES */
+.themes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;margin:1rem 0}
+.theme-card{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1.2rem;cursor:pointer;transition:transform .2s,filter .2s;position:relative;overflow:hidden}
+.theme-card:hover{transform:translateY(-4px);filter:brightness(1.15)}
+.theme-card .tc-icon{font-size:2rem;margin-bottom:.7rem}
+.theme-card h3{font-size:.52rem;color:var(--gold);margin-bottom:.3rem}
+.theme-card .tc-sub{font-size:.4rem;color:var(--text-dim);margin-bottom:.3rem}
+.theme-card .tc-lex{font-size:.38rem;color:var(--diamond);margin-bottom:.8rem}
+.level-dots{display:flex;gap:5px;margin-top:.6rem}
+.ld{width:14px;height:14px;border:2px solid var(--stone-dk)}
+.ld.done{background:var(--gold)}
+.ld.unlocked{background:var(--grass)}
+.ld.locked{background:#222}
+.tc-progress{margin-top:.6rem;height:8px;background:#111;border:2px solid var(--stone-dk);overflow:hidden}
+.tc-progress-fill{height:100%;background:linear-gradient(90deg,var(--grass-dk),var(--gold));transition:width .4s}
+
+/* LEVELS */
+.levels-list{display:flex;flex-direction:column;gap:.8rem;margin:1rem 0}
+.level-card{display:flex;align-items:center;gap:1rem;background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1rem 1.3rem;cursor:pointer;transition:transform .15s,filter .15s}
+.level-card:hover:not(.locked){transform:translateY(-3px);filter:brightness(1.15)}
+.level-card.locked{opacity:.45;cursor:not-allowed}
+.level-card.done{border-color:var(--gold) #5A4000 #5A4000 var(--gold)}
+.lv-badge{width:52px;height:52px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;border:3px solid var(--stone-dk)}
+.lv-badge.stone{background:var(--stone)}
+.lv-badge.iron{background:#6A6A6A}
+.lv-badge.gold{background:var(--gold)}
+.lv-badge.diamond{background:var(--diamond)}
+.lv-info{flex:1}
+.lv-info h3{font-size:.55rem;color:var(--gold);margin-bottom:.35rem}
+.lv-info .lv-type{font-size:.4rem;color:var(--text-dim);margin-bottom:.4rem}
+.lv-info .lv-score{font-size:.45rem;color:var(--green)}
+.lv-lock{font-size:1.4rem}
+
+/* EXERCISE SELECT (when multiple exercises in a level) */
+.ex-select-list{display:flex;flex-direction:column;gap:.8rem;margin:1rem 0}
+.ex-select-card{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1rem 1.3rem;cursor:pointer;transition:filter .15s}
+.ex-select-card:hover{filter:brightness(1.2)}
+.ex-select-card h3{font-size:.55rem;color:var(--diamond);margin-bottom:.4rem}
+.ex-select-card .ex-done-tag{font-size:.4rem;color:var(--gold)}
+
+/* XP BAR */
+.xp-wrap{margin-bottom:1.2rem}
+.xp-label{display:flex;justify-content:space-between;font-size:.38rem;color:var(--text-dim);margin-bottom:.3rem}
+.xp-bar{height:14px;background:#111;border:3px solid var(--stone-dk);overflow:hidden}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--grass-dk),var(--gold));transition:width .4s}
+
+/* EXERCISE */
+.ex-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;margin-bottom:1rem}
+.ex-title{font-size:.5rem;color:var(--gold)}
+.ex-counter{font-size:.45rem;color:var(--text-dim)}
+.question-box{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1.3rem;margin-bottom:1.2rem}
+.q-text{font-size:.65rem;line-height:2;margin-bottom:1.2rem;color:#FFF}
+.q-blank{border-bottom:3px solid var(--diamond);min-width:80px;display:inline-block;text-align:center;background:#0A0A20}
+
+/* QCM */
+.qcm-opts{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.qcm-opt{display:flex;align-items:center;gap:.7rem;background:#0A0A20;border:3px solid var(--stone-dk);padding:.7rem;cursor:pointer;font-size:.55rem;font-family:'Press Start 2P',monospace;color:var(--text);transition:border-color .15s,background .15s;text-align:left}
+.qcm-opt:hover:not(.locked){border-color:var(--diamond);background:#101030}
+.qcm-opt.sel{border-color:var(--gold);background:#1A1800}
+.qcm-opt.ok{border-color:var(--green)!important;background:#041A08!important;color:var(--green)!important}
+.qcm-opt.ko{border-color:var(--red)!important;background:#1A0404!important;color:#FF7070!important}
+.qcm-opt.locked{cursor:default}
+.opt-letter{width:22px;height:22px;background:var(--stone);display:flex;align-items:center;justify-content:center;font-size:.45rem;flex-shrink:0}
+
+/* BLANK */
+.blank-hint{font-size:.45rem;color:var(--diamond);margin-bottom:.4rem}
+.blank-input{width:100%;background:#050A14;border:3px solid var(--stone-dk);border-right-color:var(--stone-lt);border-bottom-color:var(--stone-lt);color:var(--text);font-family:'Press Start 2P',monospace;font-size:.7rem;padding:.8rem;outline:none;margin-top:.5rem}
+.blank-input:focus{border-color:var(--diamond)}
+.blank-input.ok{border-color:var(--green);background:#041A08;color:var(--green)}
+.blank-input.ko{border-color:var(--red);background:#1A0404;color:#FF7070}
+
+/* WORD ORDER */
+.order-instruction{font-size:.42rem;color:var(--text-dim);margin-bottom:.6rem}
+.word-bank-label,.word-ans-label{font-size:.38rem;color:var(--text-dim);margin-bottom:.3rem}
+.word-bank{display:flex;flex-wrap:wrap;gap:.5rem;min-height:46px;padding:.7rem;background:#050A14;border:3px solid var(--stone-dk);margin-bottom:.7rem}
+.word-ans{display:flex;flex-wrap:wrap;gap:.5rem;min-height:46px;padding:.7rem;background:#041408;border:3px solid var(--grass-dk);margin-bottom:.7rem}
+.wchip{background:var(--stone);border:2px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:.4rem .7rem;font-family:'Press Start 2P',monospace;font-size:.48rem;cursor:pointer;user-select:none;transition:transform .1s,filter .1s}
+.wchip:hover{filter:brightness(1.3);transform:translateY(-2px)}
+.wchip.in-ans{background:var(--grass-dk);border-color:var(--grass) #1A4A0A #1A4A0A var(--grass)}
+
+/* ERROR */
+.err-sentence{font-size:.7rem;line-height:2;padding:1rem;background:#050A14;border:3px solid var(--stone-dk);margin-bottom:1rem;text-align:center}
+.err-btns{display:flex;gap:1rem;justify-content:center}
+
+/* FEEDBACK */
+.feedback-ok{background:rgba(39,174,96,.15);border:3px solid var(--green);padding:.9rem;margin-top:.8rem}
+.feedback-ko{background:rgba(192,57,43,.15);border:3px solid var(--red);padding:.9rem;margin-top:.8rem}
+.fb-icon{font-size:1.2rem;margin-bottom:.4rem}
+.fb-msg{font-size:.55rem;margin-bottom:.5rem}
+.fb-expl{font-size:.45rem;color:var(--text-dim);line-height:2}
+.fb-corr{font-size:.5rem;color:var(--gold);margin-top:.5rem}
+
+/* SCORE SCREEN */
+.score-screen{text-align:center;padding:1.5rem}
+.score-stars{font-size:2.5rem;margin:1rem 0}
+.score-big{font-size:1.8rem;color:var(--gold);text-shadow:3px 3px 0 #7A6000;margin:.5rem 0}
+.score-label{font-size:.45rem;color:var(--text-dim);margin-bottom:1.5rem}
+.score-msg{font-size:.55rem;color:var(--diamond);margin:1rem 0;line-height:2}
+.score-grid{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:1rem 0;text-align:center}
+.score-stat{background:var(--bg2);border:3px solid var(--stone-dk);padding:.8rem}
+.score-stat .sv{font-size:1rem;color:var(--gold);display:block;margin-bottom:.3rem}
+.score-stat .sl{font-size:.38rem;color:var(--text-dim)}
+
+/* BILAN */
+.bilan-section{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1.2rem;margin-bottom:1rem}
+.bilan-section h3{font-size:.5rem;color:var(--gold);margin-bottom:.6rem;border-bottom:2px solid var(--stone-dk);padding-bottom:.4rem}
+.bilan-score-line{font-size:.45rem;color:var(--green);margin-bottom:.5rem}
+.bilan-q{font-size:.4rem;color:var(--text-dim);line-height:2;margin-bottom:.4rem;border-bottom:1px solid #1A1A1A;padding-bottom:.4rem}
+.bilan-q .bq-q{color:var(--text-dim)}
+.bilan-q .bq-user-ok{color:var(--green)}
+.bilan-q .bq-user-ko{color:var(--red)}
+.bilan-q .bq-corr{color:var(--gold)}
+.bilan-q .bq-expl{color:#666;font-size:.37rem}
+
+/* TEACHER */
+.teacher-section{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1.3rem;margin-bottom:1.2rem}
+.teacher-section h2{font-size:.6rem;color:var(--gold);margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--stone-dk)}
+.stu-table{width:100%;border-collapse:collapse;font-size:.38rem}
+.stu-table th{background:var(--stone-dk);color:var(--gold);padding:.5rem;text-align:left}
+.stu-table td{padding:.5rem;border-bottom:1px solid var(--stone-dk);vertical-align:top;line-height:2}
+.stu-table tr:hover td{background:#0A0A18}
+.theme-tag{display:inline-block;background:var(--grass-dk);padding:.2rem .4rem;margin:.1rem;font-size:.3rem}
+
+/* TOAST */
+.toast{position:fixed;top:1rem;right:1rem;background:var(--bg2);border:4px solid var(--gold);padding:1rem 1.3rem;font-size:.5rem;color:var(--gold);z-index:9999;animation:tIn .3s ease;max-width:280px;pointer-events:none}
+@keyframes tIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
+.burst{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:5rem;z-index:9998;pointer-events:none;animation:bst .7s ease forwards}
+@keyframes bst{0%{transform:translate(-50%,-50%) scale(0);opacity:1}60%{transform:translate(-50%,-50%) scale(1.5);opacity:1}100%{transform:translate(-50%,-50%) scale(2.5);opacity:0}}
+
+/* RGPD */
+.rgpd-content{background:var(--bg2);border:4px solid;border-color:var(--stone-lt) var(--stone-dk) var(--stone-dk) var(--stone-lt);padding:1.5rem;font-size:.42rem;line-height:2.2;color:var(--text-dim)}
+.rgpd-content h2{font-size:.6rem;color:var(--gold);margin:1rem 0 .5rem}
+.rgpd-content p{margin-bottom:.7rem}
+
+/* FOOTER */
+footer{background:#070C12;border-top:3px solid var(--stone-dk);padding:.7rem 1rem;display:flex;align-items:center;justify-content:space-between;font-size:.38rem;color:var(--text-dim);position:relative;z-index:1;flex-wrap:wrap;gap:.5rem}
+
+/* CORRECTIONS PAGE */
+.corr-list{display:flex;flex-direction:column;gap:.7rem;margin:1rem 0}
+.corr-item{background:var(--bg2);border:3px solid;padding:.8rem;font-size:.42rem;line-height:2}
+.corr-item.ci-ok{border-color:var(--green)}
+.corr-item.ci-ko{border-color:var(--red)}
+.ci-q{color:var(--text-dim);margin-bottom:.3rem}
+.ci-your{margin-bottom:.2rem}
+.ci-your.ok{color:var(--green)}
+.ci-your.ko{color:var(--red)}
+.ci-ans{color:var(--gold);margin-bottom:.2rem}
+.ci-expl{color:#666;font-size:.38rem}
+
+/* ENCOURAGEMENT */
+.enc{font-size:.5rem;color:var(--gold);text-align:center;padding:.5rem;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  .home-title{font-size:1rem}
+  .qcm-opts{grid-template-columns:1fr}
+  .home-cards{flex-direction:column;align-items:center}
+  .themes-grid{grid-template-columns:1fr}
+  .score-grid{grid-template-columns:1fr}
+  .form-row{flex-direction:column}
+  .err-btns{flex-direction:column}
+  #app{padding:.7rem}
+}
+.sep{height:1rem}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<footer>
+  <span>⚔️ Créé par C. Iemfre</span>
+  <button class="mc-btn" onclick="navigate('rgpd')" style="font-size:.37rem;padding:.35rem .7rem">📜 RGPD</button>
+</footer>
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  EXERCISE DATABASE
+// ═══════════════════════════════════════════════════════════════
+
+const THEMES=[
+// ─── THEME 1 ─── PRÉSENT SIMPLE AFFIRMATIF / Nourriture ────────
+{id:'ps-aff',name:'Présent simple',sub:'Forme affirmative',lex:'🍕 Nourriture',icon:'🍕',color:'#3D6A1C',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:'Choisis la bonne forme du verbe',exs:[{
+  id:'pa-l1',title:'Présent simple affirmatif – Nourriture',qs:[
+  {q:'She ___ pizza on Fridays.',opts:['eat','eats','eating','eaten'],c:1,e:'Avec she/he/it, on ajoute -s : eat → eats.'},
+  {q:'They ___ vegetables every day.',opts:['eats','eat','eating','eaten'],c:1,e:'Avec they/we/you/I, le verbe reste à la base : eat.'},
+  {q:'He ___ orange juice in the morning.',opts:['drink','drinks','drinking','drank'],c:1,e:'Avec he, on ajoute -s : drink → drinks.'},
+  {q:'I ___ bread with butter.',opts:['likes','like','liking','liked'],c:1,e:'Avec I, le verbe reste à la base : like.'},
+  {q:'My mother ___ salads on Sundays.',opts:['make','makes','making','made'],c:1,e:'My mother = she → on ajoute -s : make → makes.'},
+  {q:'We ___ fish and chips at the restaurant.',opts:['orders','order','ordering','ordered'],c:1,e:'Avec we, le verbe reste à la base : order.'},
+  {q:'The chef ___ Italian food.',opts:['prepare','prepares','preparing','prepared'],c:1,e:'The chef = he → on ajoute -s : prepare → prepares.'},
+  {q:'You ___ chocolate cake every week.',opts:['bakes','bake','baking','baked'],c:1,e:'Avec you, le verbe reste à la base : bake.'},
+  {q:'My sister ___ sushi a lot.',opts:['love','loves','loving','loved'],c:1,e:'My sister = she → on ajoute -s : love → loves.'},
+  {q:'The children ___ milk for breakfast.',opts:['drinks','drink','drinking','drank'],c:1,e:'The children = they → le verbe reste à la base : drink.'},
+  {q:'He ___ sandwiches for lunch.',opts:['eat','eats','eating','eaten'],c:1,e:'Avec he, on ajoute -s : eat → eats.'},
+  {q:'She ___ strawberries in summer.',opts:['pick','picks','picking','picked'],c:1,e:'Avec she, on ajoute -s : pick → picks.'},
+  {q:'Our teacher ___ healthy food.',opts:['prefer','prefers','preferring','preferred'],c:1,e:'Our teacher = he/she → on ajoute -s : prefer → prefers.'},
+  {q:'I ___ my vegetables every day.',opts:['eats','eat','eating','eaten'],c:1,e:'Avec I, le verbe reste à la base : eat.'},
+  {q:'The baker ___ fresh bread every morning.',opts:['sell','sells','selling','sold'],c:1,e:'The baker = he → on ajoute -s : sell → sells.'},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:'Conjugue le verbe entre parenthèses',exs:[{
+  id:'pa-l2',title:'Présent simple affirmatif – Phrases à trous',qs:[
+  {b:'My father',h:'cook',a:'delicious pasta on Sundays.',ans:'cooks',e:'My father = he → +s : cook → cooks.'},
+  {b:'They',h:'grow',a:'tomatoes in their garden.',ans:'grow',e:'They → base : grow.'},
+  {b:'She',h:'eat',a:'a banana every morning.',ans:'eats',e:'She → +s : eat → eats.'},
+  {b:'The restaurant',h:'serve',a:'traditional food.',ans:'serves',e:'The restaurant = it → +s : serve → serves.'},
+  {b:'We',h:'enjoy',a:'barbecues in summer.',ans:'enjoy',e:'We → base : enjoy.'},
+  {b:'He',h:'buy',a:'fresh fruit at the market.',ans:'buys',e:'He → +s : buy → buys.'},
+  {b:'The children',h:'love',a:'ice cream.',ans:'love',e:'The children = they → base : love.'},
+  {b:'My aunt',h:'make',a:'homemade jam.',ans:'makes',e:'My aunt = she → +s : make → makes.'},
+  {b:'You',h:'need',a:'five portions of fruit per day.',ans:'need',e:'You → base : need.'},
+  {b:'The supermarket',h:'sell',a:'organic products.',ans:'sells',e:'The supermarket = it → +s : sell → sells.'},
+  {b:'She',h:'drink',a:'green tea every evening.',ans:'drinks',e:'She → +s : drink → drinks.'},
+  {b:'My parents',h:'grow',a:'herbs in the garden.',ans:'grow',e:'My parents = they → base : grow.'},
+  {b:'He',h:'hate',a:'spicy food.',ans:'hates',e:'He → +s : hate → hates.'},
+  {b:'The bakery',h:'open',a:'at 7am every day.',ans:'opens',e:'The bakery = it → +s : open → opens.'},
+  {b:'I',h:'prefer',a:'chocolate to vanilla.',ans:'prefer',e:'I → base : prefer.'},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:'Clique sur les mots pour former la phrase',exs:[{
+  id:'pa-l3',title:'Présent simple affirmatif – Remise en ordre',qs:[
+  {s:'She eats cereals every morning.',e:"Sujet (She) + Verbe (eats) + COD (cereals) + every morning."},
+  {s:'They eat vegetables every day.',e:"Sujet (They) + Verbe (eat) + COD (vegetables) + every day."},
+  {s:'He drinks lemonade in summer.',e:"Sujet (He) + Verbe (drinks) + COD (lemonade) + in summer."},
+  {s:'We eat sandwiches at school.',e:"Sujet (We) + Verbe (eat) + COD + lieu (at school)."},
+  {s:'She buys fresh fruit at the market.',e:"Sujet + Verbe + COD (fresh fruit) + lieu (at the market)."},
+  {s:'My sister loves chocolate cake.',e:"Sujet (My sister) + Verbe (loves) + COD."},
+  {s:'The children drink milk for breakfast.',e:"Sujet + Verbe + COD (milk) + for breakfast."},
+  {s:'My mother makes salads on Sundays.',e:"Sujet (My mother) + Verbe (makes) + COD + on Sundays."},
+  {s:'Our teacher prefers healthy food.',e:"Sujet (Our teacher) + Verbe (prefers) + COD."},
+  {s:'The baker sells fresh bread every morning.',e:"Sujet + Verbe + COD (fresh bread) + every morning."},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Cette phrase est-elle correcte ou incorrecte ?',exs:[{
+  id:'pa-l4',title:"Présent simple affirmatif – Trouver l'erreur",qs:[
+  {s:'She eat apples every day.',ok:false,c:'She eats apples every day.',e:'Avec she → eats (+s). She eat est incorrect.'},
+  {s:'They eat pizza on Fridays.',ok:true,c:'',e:'They → base eat. ✓'},
+  {s:'He love chocolate cake.',ok:false,c:'He loves chocolate cake.',e:'Avec he → loves (+s). He love est incorrect.'},
+  {s:'My brother drinks milk every morning.',ok:true,c:'',e:'My brother = he → drinks (+s). ✓'},
+  {s:'We eats vegetables for dinner.',ok:false,c:'We eat vegetables for dinner.',e:'Avec we → base eat (pas eats).'},
+  {s:'The chef prepares Italian food.',ok:true,c:'',e:'The chef = he → prepares (+s). ✓'},
+  {s:'I likes sushi.',ok:false,c:'I like sushi.',e:'Avec I → base like (pas likes).'},
+  {s:'My sisters loves ice cream.',ok:false,c:'My sisters love ice cream.',e:'My sisters = they → base love (pas loves).'},
+  {s:'She buys fresh fruit at the market.',ok:true,c:'',e:'She → buys (+s). ✓'},
+  {s:'You needs five portions per day.',ok:false,c:'You need five portions per day.',e:'Avec you → base need (pas needs).'},
+  {s:'The baker sell fresh bread.',ok:false,c:'The baker sells fresh bread.',e:'The baker = he → sells (+s).'},
+  {s:'Our teacher prefers healthy food.',ok:true,c:'',e:'Our teacher = he/she → prefers (+s). ✓'},
+  {s:'The children drinks orange juice.',ok:false,c:'The children drink orange juice.',e:'The children = they → base drink (pas drinks).'},
+  {s:'My mother makes salads every Sunday.',ok:true,c:'',e:'My mother = she → makes (+s). ✓'},
+  {s:'He order pizza every Friday.',ok:false,c:'He orders pizza every Friday.',e:'Avec he → orders (+s). He order est incorrect.'},
+]}]}
+]},
+
+// ─── THEME 2 ─── PRÉSENT SIMPLE NÉGATIF / Sport ─────────────────
+{id:'ps-neg',name:'Présent simple',sub:'Forme négative',lex:'⚽ Sport',icon:'⚽',color:'#1C4A7C',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:"Choisis don't ou doesn't",exs:[{
+  id:'pn-l1',title:'Présent simple négatif – Sport',qs:[
+  {q:'She ___ football.',opts:["don't play","doesn't play","doesn't plays","don't plays"],c:1,e:"Avec she → doesn't + base : doesn't play."},
+  {q:'They ___ at the gym.',opts:["doesn't train","don't train","doesn't trains","don't trains"],c:1,e:"Avec they → don't + base : don't train."},
+  {q:'He ___ tennis on weekends.',opts:["don't play","doesn't play","doesn't plays","don't plays"],c:1,e:"Avec he → doesn't + base : doesn't play."},
+  {q:'I ___ swimming.',opts:["doesn't like","don't like","doesn't likes","don't likes"],c:1,e:"Avec I → don't + base : don't like."},
+  {q:'My sister ___ any sport.',opts:["don't do","doesn't do","doesn't does","don't does"],c:1,e:"My sister = she → doesn't + base : doesn't do."},
+  {q:'We ___ basketball.',opts:["doesn't play","don't play","doesn't plays","don't plays"],c:1,e:"Avec we → don't + base : don't play."},
+  {q:'The coach ___ the players.',opts:["don't help","doesn't help","doesn't helps","don't helps"],c:1,e:"The coach = he → doesn't + base : doesn't help."},
+  {q:'You ___ enough.',opts:["doesn't exercise","don't exercise","doesn't exercises","don't exercises"],c:1,e:"Avec you → don't + base : don't exercise."},
+  {q:'My brothers ___ at the weekend.',opts:["doesn't run","don't run","doesn't runs","don't runs"],c:1,e:"My brothers = they → don't + base : don't run."},
+  {q:'She ___ to the gym on Mondays.',opts:["don't go","doesn't go","doesn't goes","don't goes"],c:1,e:"Avec she → doesn't + base : doesn't go."},
+  {q:'He ___ cycling.',opts:["don't enjoy","doesn't enjoy","doesn't enjoys","don't enjoys"],c:1,e:"Avec he → doesn't + base : doesn't enjoy."},
+  {q:'I ___ any sports on TV.',opts:["doesn't watch","don't watch","doesn't watches","don't watches"],c:1,e:"Avec I → don't + base : don't watch."},
+  {q:'Our team ___ every match.',opts:["don't win","doesn't win","doesn't wins","don't wins"],c:1,e:"Our team = it → doesn't + base : doesn't win."},
+  {q:'They ___ a club.',opts:["doesn't have","don't have","doesn't has","don't has"],c:1,e:"Avec they → don't + base : don't have."},
+  {q:'My friend ___ hiking.',opts:["don't like","doesn't like","doesn't likes","don't likes"],c:1,e:"My friend = he/she → doesn't + base : doesn't like."},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:"Complète avec don't ou doesn't + verbe",exs:[{
+  id:'pn-l2',title:"Présent simple négatif – Phrases à trous",qs:[
+  {b:'My father',h:"don't / doesn't + play",a:'golf.',ans:"doesn't play",e:"My father = he → doesn't + base (play)."},
+  {b:'They',h:"don't / doesn't + train",a:'in winter.',ans:"don't train",e:"They → don't + base (train)."},
+  {b:'She',h:"don't / doesn't + swim",a:'in the sea.',ans:"doesn't swim",e:"She → doesn't + base (swim)."},
+  {b:'The team',h:"don't / doesn't + practice",a:'on Sundays.',ans:"doesn't practice",e:"The team = it → doesn't + base (practice)."},
+  {b:'We',h:"don't / doesn't + go",a:'jogging in the rain.',ans:"don't go",e:"We → don't + base (go)."},
+  {b:'He',h:"don't / doesn't + wear",a:'a helmet when cycling.',ans:"doesn't wear",e:"He → doesn't + base (wear)."},
+  {b:'The players',h:"don't / doesn't + eat",a:'junk food.',ans:"don't eat",e:"The players = they → don't + base (eat)."},
+  {b:'My aunt',h:"don't / doesn't + do",a:'any sport.',ans:"doesn't do",e:"My aunt = she → doesn't + base (do)."},
+  {b:'You',h:"don't / doesn't + stretch",a:'before running.',ans:"don't stretch",e:"You → don't + base (stretch)."},
+  {b:'The referee',h:"don't / doesn't + allow",a:'bad behaviour.',ans:"doesn't allow",e:"The referee = he → doesn't + base (allow)."},
+  {b:'She',h:"don't / doesn't + play",a:'in the rain.',ans:"doesn't play",e:"She → doesn't + base (play)."},
+  {b:'My parents',h:"don't / doesn't + watch",a:'sports on TV.',ans:"don't watch",e:"My parents = they → don't + base (watch)."},
+  {b:'He',h:"don't / doesn't + win",a:'every race.',ans:"doesn't win",e:"He → doesn't + base (win)."},
+  {b:'The gym',h:"don't / doesn't + open",a:'on Sundays.',ans:"doesn't open",e:"The gym = it → doesn't + base (open)."},
+  {b:'I',h:"don't / doesn't + like",a:'contact sports.',ans:"don't like",e:"I → don't + base (like)."},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:'Forme la phrase négative',exs:[{
+  id:'pn-l3',title:"Présent simple négatif – Remise en ordre",qs:[
+  {s:"She doesn't play football.",e:"Sujet + doesn't + base + COD."},
+  {s:"They don't train at the gym.",e:"Sujet + don't + base + lieu."},
+  {s:"He doesn't enjoy cycling.",e:"Sujet + doesn't + base + COD."},
+  {s:"We don't jog in the rain.",e:"Sujet + don't + base + in the rain."},
+  {s:"I don't like contact sports.",e:"Sujet + don't + base + COD."},
+  {s:"Our team doesn't win every match.",e:"Sujet (Our team) + doesn't + base + COD."},
+  {s:"She doesn't go swimming at weekends.",e:"Sujet + doesn't + go + V-ing + at weekends."},
+  {s:"My brothers don't play on Sundays.",e:"Sujet + don't + base + on Sundays."},
+  {s:"The gym doesn't open on Monday.",e:"Sujet + doesn't + base + on Monday."},
+  {s:"The coach doesn't help the players.",e:"Sujet + doesn't + base + COD."},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Correcte ou incorrecte ?',exs:[{
+  id:'pn-l4',title:"Présent simple négatif – Trouver l'erreur",qs:[
+  {s:"She don't play football.",ok:false,c:"She doesn't play football.",e:"Avec she → doesn't (pas don't)."},
+  {s:"They don't train every day.",ok:true,c:'',e:"Avec they → don't + base. ✓"},
+  {s:"He doesn't plays tennis.",ok:false,c:"He doesn't play tennis.",e:"Après doesn't → base (pas plays)."},
+  {s:"I don't like swimming.",ok:true,c:'',e:"I → don't + base. ✓"},
+  {s:"My sister doesn't do any sport.",ok:true,c:'',e:"She → doesn't + base. ✓"},
+  {s:"We doesn't go to the gym.",ok:false,c:"We don't go to the gym.",e:"Avec we → don't (pas doesn't)."},
+  {s:"The coach don't help the players.",ok:false,c:"The coach doesn't help the players.",e:"The coach = he → doesn't (pas don't)."},
+  {s:"You don't exercise enough.",ok:true,c:'',e:"You → don't + base. ✓"},
+  {s:"She doesn't goes swimming.",ok:false,c:"She doesn't go swimming.",e:"Après doesn't → base go (pas goes)."},
+  {s:"He doesn't enjoy cycling.",ok:true,c:'',e:"He → doesn't + base. ✓"},
+  {s:"I doesn't watch any sports.",ok:false,c:"I don't watch any sports.",e:"Avec I → don't (pas doesn't)."},
+  {s:"Our team doesn't win every match.",ok:true,c:'',e:"Our team = it → doesn't + base. ✓"},
+  {s:"They doesn't have a club.",ok:false,c:"They don't have a club.",e:"Avec they → don't (pas doesn't)."},
+  {s:"My friend doesn't like hiking.",ok:true,c:'',e:"My friend = he/she → doesn't + base. ✓"},
+  {s:"The gym don't open on Sundays.",ok:false,c:"The gym doesn't open on Sundays.",e:"The gym = it → doesn't (pas don't)."},
+]}]}
+]},
+
+// ─── THEME 3 ─── PRÉSENT SIMPLE INTERROGATIF / Loisirs ──────────
+{id:'ps-int',name:'Présent simple',sub:'Forme interrogative',lex:'🎮 Loisirs',icon:'🎮',color:'#5A1C7C',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:'Choisis Do ou Does',exs:[{
+  id:'pi-l1',title:'Présent simple interrogatif – Loisirs',qs:[
+  {q:'___ she play video games?',opts:['Do','Does','Is','Has'],c:1,e:'Avec she → Does pour les questions au présent simple.'},
+  {q:'___ they go to concerts?',opts:['Does','Do','Is','Has'],c:1,e:'Avec they → Do pour les questions.'},
+  {q:'___ he read books?',opts:['Do','Does','Is','Has'],c:1,e:'Avec he → Does pour les questions.'},
+  {q:'___ you enjoy painting?',opts:['Does','Do','Is','Has'],c:1,e:'Avec you → Do pour les questions.'},
+  {q:'___ your sister like dancing?',opts:['Do','Does','Is','Has'],c:1,e:'Your sister = she → Does pour les questions.'},
+  {q:'___ we need tickets?',opts:['Does','Do','Is','Has'],c:1,e:'Avec we → Do pour les questions.'},
+  {q:'___ the club open on Sundays?',opts:['Do','Does','Is','Has'],c:1,e:'The club = it → Does pour les questions.'},
+  {q:'___ I need a membership?',opts:['Does','Do','Is','Has'],c:1,e:'Avec I → Do pour les questions.'},
+  {q:'___ your friends watch films?',opts:['Does','Do','Is','Has'],c:1,e:'Your friends = they → Do pour les questions.'},
+  {q:'___ she go to the cinema often?',opts:['Do','Does','Is','Has'],c:1,e:'Avec she → Does pour les questions.'},
+  {q:'___ he collect stamps?',opts:['Do','Does','Is','Has'],c:1,e:'Avec he → Does pour les questions.'},
+  {q:'___ they enjoy hiking?',opts:['Does','Do','Is','Has'],c:1,e:'Avec they → Do pour les questions.'},
+  {q:'___ your brother play guitar?',opts:['Do','Does','Is','Has'],c:1,e:'Your brother = he → Does pour les questions.'},
+  {q:'___ you like listening to music?',opts:['Does','Do','Is','Has'],c:1,e:'Avec you → Do pour les questions.'},
+  {q:'___ the museum close early?',opts:['Do','Does','Is','Has'],c:1,e:'The museum = it → Does pour les questions.'},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:'Complète avec Do ou Does',exs:[{
+  id:'pi-l2',title:'Présent simple interrogatif – Phrases à trous',qs:[
+  {b:'',h:'Do / Does',a:'she go to the theatre?',ans:'Does',e:'She → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'they enjoy outdoor activities?',ans:'Do',e:'They → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'he play chess?',ans:'Does',e:'He → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'you like cooking as a hobby?',ans:'Do',e:'You → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'your mother do yoga?',ans:'Does',e:'Your mother = she → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'we have to buy tickets?',ans:'Do',e:'We → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'the library open on weekends?',ans:'Does',e:'The library = it → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'I need a special pass?',ans:'Do',e:'I → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'your friends come to the club?',ans:'Do',e:'Your friends = they → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'she paint in her free time?',ans:'Does',e:'She → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'he collect comic books?',ans:'Does',e:'He → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'they travel during the holidays?',ans:'Do',e:'They → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'your brother play an instrument?',ans:'Does',e:'Your brother = he → Does + sujet + base.'},
+  {b:'',h:'Do / Does',a:'you watch documentaries?',ans:'Do',e:'You → Do + sujet + base.'},
+  {b:'',h:'Do / Does',a:'the concert start at 8pm?',ans:'Does',e:'The concert = it → Does + sujet + base.'},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:'Forme la question correcte',exs:[{
+  id:'pi-l3',title:'Présent simple interrogatif – Remise en ordre',qs:[
+  {s:'Does she play video games?',e:"Does + she + base (play) + ?"},
+  {s:'Do they go to concerts?',e:"Do + they + base (go) + ?"},
+  {s:'Does he read books?',e:"Does + he + base (read) + ?"},
+  {s:'Does she go to the cinema often?',e:"Does + she + base (go) + ... + often + ?"},
+  {s:'Do they enjoy hiking?',e:"Do + they + base (enjoy) + ?"},
+  {s:'Does your brother play guitar?',e:"Does + your brother + base (play) + ?"},
+  {s:'Do you like listening to music?',e:"Do + you + base (like) + ... + ?"},
+  {s:'Does he collect stamps?',e:"Does + he + base (collect) + ?"},
+  {s:'Does the club open on Sundays?',e:"Does + the club + base (open) + ?"},
+  {s:'Do we need a membership?',e:"Do + we + base (need) + ?"},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Cette question est-elle correcte ?',exs:[{
+  id:'pi-l4',title:"Présent simple interrogatif – Trouver l'erreur",qs:[
+  {s:'Does she plays video games?',ok:false,c:'Does she play video games?',e:'Après Does → base (pas plays).'},
+  {s:'Do they go to concerts?',ok:true,c:'',e:'Do + they + base. ✓'},
+  {s:'Do he read books?',ok:false,c:'Does he read books?',e:'Avec he → Does (pas Do).'},
+  {s:'Does she go to the cinema often?',ok:true,c:'',e:'Does + she + base. ✓'},
+  {s:'Do your friends watches films?',ok:false,c:'Do your friends watch films?',e:'Après Do → base watch (pas watches).'},
+  {s:'Does the club open on Sundays?',ok:true,c:'',e:'Does + the club + base. ✓'},
+  {s:'Does you enjoy painting?',ok:false,c:'Do you enjoy painting?',e:'Avec you → Do (pas Does).'},
+  {s:'Do they enjoy hiking?',ok:true,c:'',e:'Do + they + base. ✓'},
+  {s:'Does your brother plays guitar?',ok:false,c:'Does your brother play guitar?',e:'Après Does → base play (pas plays).'},
+  {s:'Do I need a membership?',ok:true,c:'',e:'Do + I + base. ✓'},
+  {s:'Does they travel during holidays?',ok:false,c:'Do they travel during holidays?',e:'Avec they → Do (pas Does).'},
+  {s:'Does the museum close early?',ok:true,c:'',e:'Does + the museum + base. ✓'},
+  {s:'Do she like dancing?',ok:false,c:'Does she like dancing?',e:'Avec she → Does (pas Do).'},
+  {s:'Does he collect stamps?',ok:true,c:'',e:'Does + he + base. ✓'},
+  {s:'Do the library open on weekends?',ok:false,c:'Does the library open on weekends?',e:'The library = it → Does (pas Do).'},
+]}]}
+]},
+
+// ─── THEME 4 ─── PRÉTÉRIT AFFIRMATIF / Voyages + Vêtements ──────
+{id:'pret-aff',name:'Prétérit',sub:'Forme affirmative',lex:'✈️ Voyages & Vêtements',icon:'✈️',color:'#7C5A1C',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:'Choisis la bonne forme du prétérit',exs:[
+{id:'pra-l1-e1',title:'Prétérit affirmatif – Voyages',qs:[
+  {q:'She ___ to Paris last summer. (go)',opts:['go','goes','went','gone'],c:2,e:'go est irrégulier. Prétérit : go → went.'},
+  {q:'They ___ a lot of monuments. (visit)',opts:['visit','visited','visits','visiting'],c:1,e:'visit est régulier. Prétérit : visit + ed = visited.'},
+  {q:'He ___ his passport at home. (forget)',opts:['forget','forgets','forgot','forgotten'],c:2,e:'forget est irrégulier. Prétérit : forget → forgot.'},
+  {q:'We ___ our hotel online. (book)',opts:['book','books','booked','booking'],c:2,e:'book est régulier. Prétérit : book + ed = booked.'},
+  {q:'I ___ many photos during the trip. (take)',opts:['take','takes','took','taken'],c:2,e:'take est irrégulier. Prétérit : take → took.'},
+  {q:'My family ___ by train to London. (travel)',opts:['travel','travels','travelled','travelling'],c:2,e:'travel est régulier. Prétérit : travel + led = travelled.'},
+  {q:'She ___ the Eiffel Tower for the first time. (see)',opts:['see','sees','saw','seen'],c:2,e:'see est irrégulier. Prétérit : see → saw.'},
+  {q:'He ___ his luggage at the airport. (lose)',opts:['lose','loses','lost','losing'],c:2,e:'lose est irrégulier. Prétérit : lose → lost.'},
+  {q:'They ___ traditional food in Japan. (eat)',opts:['eat','eats','ate','eaten'],c:2,e:'eat est irrégulier. Prétérit : eat → ate.'},
+  {q:'We ___ a tour guide for the day. (hire)',opts:['hire','hires','hired','hiring'],c:2,e:'hire est régulier. Prétérit : hire + d = hired.'},
+]},
+{id:'pra-l1-e2',title:'Prétérit affirmatif – Vêtements',qs:[
+  {q:'She ___ a beautiful red dress. (wear)',opts:['wear','wears','wore','worn'],c:2,e:'wear est irrégulier. Prétérit : wear → wore.'},
+  {q:'He ___ new trainers last week. (buy)',opts:['buy','buys','bought','buying'],c:2,e:'buy est irrégulier. Prétérit : buy → bought.'},
+  {q:'They ___ uniforms at school last year. (wear)',opts:['wear','wears','wore','worn'],c:2,e:'wear est irrégulier. Prétérit : wear → wore.'},
+  {q:'I ___ my old jeans last Saturday. (wear)',opts:['wear','wears','wore','worn'],c:2,e:'wear est irrégulier. Prétérit : wear → wore.'},
+  {q:'She ___ a coat because it was cold. (choose)',opts:['choose','chooses','chose','chosen'],c:2,e:'choose est irrégulier. Prétérit : choose → chose.'},
+  {q:'My mother ___ me a scarf for Christmas. (knit)',opts:['knit','knits','knitted','knitting'],c:2,e:'knit est régulier. Prétérit : knit + ted = knitted.'},
+  {q:'He ___ his jacket at school. (leave)',opts:['leave','leaves','left','leaving'],c:2,e:'leave est irrégulier. Prétérit : leave → left.'},
+  {q:'She ___ the shirt in the washing machine. (wash)',opts:['wash','washes','washed','washing'],c:2,e:'wash est régulier. Prétérit : wash + ed = washed.'},
+  {q:'They ___ new clothes for the interview. (need)',opts:['need','needs','needed','needing'],c:2,e:'need est régulier. Prétérit : need + ed = needed.'},
+  {q:'I ___ my favourite sweater on holiday. (find)',opts:['find','finds','found','finding'],c:2,e:'find est irrégulier. Prétérit : find → found.'},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:'Conjugue le verbe au prétérit',exs:[
+{id:'pra-l2-e1',title:'Prétérit affirmatif – Voyages – Phrases à trous',qs:[
+  {b:'We',h:'visit',a:'the Louvre Museum last year.',ans:'visited',e:'visit = régulier → visited (+ed).'},
+  {b:'She',h:'take',a:'a boat trip on the Seine.',ans:'took',e:'take = irrégulier → took.'},
+  {b:'He',h:'meet',a:'lots of tourists in Rome.',ans:'met',e:'meet = irrégulier → met.'},
+  {b:'They',h:'stay',a:'in a youth hostel.',ans:'stayed',e:'stay = régulier → stayed (+ed).'},
+  {b:'I',h:'buy',a:'some souvenirs at the market.',ans:'bought',e:'buy = irrégulier → bought.'},
+  {b:'My brother',h:'drive',a:'from Paris to Marseille.',ans:'drove',e:'drive = irrégulier → drove.'},
+  {b:'We',h:'spend',a:'a week in Barcelona.',ans:'spent',e:'spend = irrégulier → spent.'},
+  {b:'She',h:'arrive',a:'at the airport three hours early.',ans:'arrived',e:'arrive = régulier → arrived (+d).'},
+  {b:'He',h:'enjoy',a:'the local food a lot.',ans:'enjoyed',e:'enjoy = régulier → enjoyed (+ed).'},
+  {b:'They',h:'come',a:'back from holidays on Monday.',ans:'came',e:'come = irrégulier → came.'},
+]},
+{id:'pra-l2-e2',title:'Prétérit affirmatif – Vêtements – Phrases à trous',qs:[
+  {b:'She',h:'try',a:'on three different dresses.',ans:'tried',e:'try (consonne + y) → tried (y→ied).'},
+  {b:'He',h:'buy',a:'a new suit for the wedding.',ans:'bought',e:'buy = irrégulier → bought.'},
+  {b:'They',h:'wear',a:'matching outfits.',ans:'wore',e:'wear = irrégulier → wore.'},
+  {b:'I',h:'find',a:'a great deal at the sales.',ans:'found',e:'find = irrégulier → found.'},
+  {b:'He',h:'choose',a:'a blue tie to go with his shirt.',ans:'chose',e:'choose = irrégulier → chose.'},
+  {b:'She',h:'lose',a:'her favourite earrings.',ans:'lost',e:'lose = irrégulier → lost.'},
+  {b:'They',h:'return',a:'the jacket because it was too small.',ans:'returned',e:'return = régulier → returned (+ed).'},
+  {b:'I',h:'wash',a:'all my clothes before the trip.',ans:'washed',e:'wash = régulier → washed (+ed).'},
+  {b:'My mother',h:'make',a:'me a beautiful coat.',ans:'made',e:'make = irrégulier → made.'},
+  {b:'She',h:'leave',a:'her scarf on the bus.',ans:'left',e:'leave = irrégulier → left.'},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:'Forme la phrase au prétérit',exs:[
+{id:'pra-l3-e1',title:'Prétérit affirmatif – Voyages – Remise en ordre',qs:[
+  {s:'She went to Paris last summer.',e:'Sujet + went (prétérit de go) + lieu + temps.'},
+  {s:'They visited a lot of monuments.',e:'Sujet + visited (prétérit régulier) + COD.'},
+  {s:'He forgot his passport at home.',e:'Sujet + forgot (prétérit de forget) + COD + lieu.'},
+  {s:'We booked our hotel online.',e:'Sujet + booked (prétérit régulier) + COD + adverbe.'},
+  {s:'I took many photos during the trip.',e:'Sujet + took (prétérit de take) + COD.'},
+  {s:'My family travelled to London by train.',e:'Sujet + travelled + destination + moyen.'},
+  {s:'She saw the Eiffel Tower for the first time.',e:'Sujet + saw (prétérit de see) + COD.'},
+  {s:'He lost his luggage at the airport.',e:'Sujet + lost (prétérit de lose) + COD + lieu.'},
+  {s:'They ate traditional food in Japan.',e:'Sujet + ate (prétérit de eat) + COD + lieu.'},
+  {s:'We hired a tour guide for the day.',e:'Sujet + hired (prétérit régulier) + COD.'},
+]},
+{id:'pra-l3-e2',title:'Prétérit affirmatif – Vêtements – Remise en ordre',qs:[
+  {s:'She wore a beautiful red dress to the party.',e:'Sujet + wore (prétérit de wear) + COD + lieu.'},
+  {s:'He bought new trainers last week.',e:'Sujet + bought (prétérit de buy) + COD + temps.'},
+  {s:'She chose a coat because it was cold.',e:'Sujet + chose (prétérit de choose) + COD + raison.'},
+  {s:'He left his jacket at school.',e:'Sujet + left (prétérit de leave) + COD + lieu.'},
+  {s:'She washed the shirt in the washing machine.',e:'Sujet + washed (prétérit régulier) + COD + lieu.'},
+  {s:'I found my favourite sweater on holiday.',e:'Sujet + found (prétérit de find) + COD + temps.'},
+  {s:'They needed new clothes for the interview.',e:'Sujet + needed (prétérit régulier) + COD + but.'},
+  {s:'My mother knitted me a scarf for Christmas.',e:'Sujet + knitted (prétérit régulier) + COI + COD.'},
+  {s:'I wore my old jeans last Saturday.',e:'Sujet + wore (prétérit de wear) + COD + temps.'},
+  {s:'They returned the jacket because it was too small.',e:'Sujet + returned (prétérit régulier) + COD + raison.'},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Correcte ou incorrecte ?',exs:[
+{id:'pra-l4-e1',title:"Prétérit affirmatif – Voyages – Trouver l'erreur",qs:[
+  {s:'She go to Paris last summer.',ok:false,c:'She went to Paris last summer.',e:'go est irrégulier → went au prétérit.'},
+  {s:'They visited many monuments.',ok:true,c:'',e:'visit est régulier → visited. ✓'},
+  {s:'He forgotted his passport.',ok:false,c:'He forgot his passport.',e:'forget est irrégulier → forgot (pas forgotted).'},
+  {s:'We booked our hotel online.',ok:true,c:'',e:'book est régulier → booked. ✓'},
+  {s:'I taked many photos.',ok:false,c:'I took many photos.',e:'take est irrégulier → took (pas taked).'},
+  {s:'My family travelled to London.',ok:true,c:'',e:'travel est régulier → travelled. ✓'},
+  {s:'She seed the Eiffel Tower.',ok:false,c:'She saw the Eiffel Tower.',e:'see est irrégulier → saw (pas seed).'},
+  {s:'He lost his luggage at the airport.',ok:true,c:'',e:'lose est irrégulier → lost. ✓'},
+  {s:'They eated traditional food.',ok:false,c:'They ate traditional food.',e:'eat est irrégulier → ate (pas eated).'},
+  {s:'We hired a tour guide.',ok:true,c:'',e:'hire est régulier → hired. ✓'},
+]},
+{id:'pra-l4-e2',title:"Prétérit affirmatif – Vêtements – Trouver l'erreur",qs:[
+  {s:'She weared a red dress.',ok:false,c:'She wore a red dress.',e:'wear est irrégulier → wore (pas weared).'},
+  {s:'He bought new trainers.',ok:true,c:'',e:'buy est irrégulier → bought. ✓'},
+  {s:'They wored uniforms at school.',ok:false,c:'They wore uniforms at school.',e:'wear → wore (pas wored).'},
+  {s:'I founded my favourite sweater.',ok:false,c:'I found my favourite sweater.',e:'find est irrégulier → found (pas founded).'},
+  {s:'She chose a coat because it was cold.',ok:true,c:'',e:'choose est irrégulier → chose. ✓'},
+  {s:'He left his jacket at school.',ok:true,c:'',e:'leave est irrégulier → left. ✓'},
+  {s:'She washed the shirt in the machine.',ok:true,c:'',e:'wash est régulier → washed. ✓'},
+  {s:'They needed new clothes.',ok:true,c:'',e:'need est régulier → needed. ✓'},
+  {s:'He buyed new trainers.',ok:false,c:'He bought new trainers.',e:'buy est irrégulier → bought (pas buyed).'},
+  {s:'My mother maked a coat.',ok:false,c:'My mother made a coat.',e:'make est irrégulier → made (pas maked).'},
+]}]}
+]},
+
+// ─── THEME 5 ─── PRÉTÉRIT NÉGATIF / Stages + Études ─────────────
+{id:'pret-neg',name:'Prétérit',sub:'Forme négative',lex:'🏢 Stages & Études',icon:'🏢',color:'#7C1C1C',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:"Choisis didn't + verbe base",exs:[
+{id:'prn-l1-e1',title:'Prétérit négatif – Stages',qs:[
+  {q:'She ___ her report on time. (finish)',opts:["don't finish","didn't finish","doesn't finish","didn't finished"],c:1,e:"Prétérit négatif : didn't + base (didn't finish)."},
+  {q:'They ___ at a company last summer. (work)',opts:["don't work","didn't work","doesn't work","didn't worked"],c:1,e:"Prétérit négatif : didn't + base (didn't work)."},
+  {q:'He ___ any useful skills. (learn)',opts:["don't learn","didn't learn","doesn't learn","didn't learned"],c:1,e:"Prétérit négatif : didn't + base (didn't learn)."},
+  {q:'I ___ the supervisor. (meet)',opts:["don't meet","didn't meet","doesn't meet","didn't met"],c:1,e:"Prétérit négatif : didn't + base (didn't meet)."},
+  {q:'My friend ___ on time. (arrive)',opts:["don't arrive","didn't arrive","doesn't arrive","didn't arrived"],c:1,e:"Prétérit négatif : didn't + base (didn't arrive)."},
+  {q:'We ___ a good impression. (make)',opts:["don't make","didn't make","doesn't make","didn't made"],c:1,e:"Prétérit négatif : didn't + base (didn't make)."},
+  {q:'The company ___ us any feedback. (give)',opts:["don't give","didn't give","doesn't give","didn't gave"],c:1,e:"Prétérit négatif : didn't + base (didn't give)."},
+  {q:'She ___ the task correctly. (understand)',opts:["don't understand","didn't understand","doesn't understand","didn't understood"],c:1,e:"Prétérit négatif : didn't + base (didn't understand)."},
+  {q:'He ___ a professional email. (write)',opts:["don't write","didn't write","doesn't write","didn't wrote"],c:1,e:"Prétérit négatif : didn't + base (didn't write)."},
+  {q:'They ___ their placement. (enjoy)',opts:["don't enjoy","didn't enjoy","doesn't enjoy","didn't enjoyed"],c:1,e:"Prétérit négatif : didn't + base (didn't enjoy)."},
+]},
+{id:'prn-l1-e2',title:'Prétérit négatif – Études',qs:[
+  {q:'She ___ her homework last night. (do)',opts:["don't do","didn't do","doesn't do","didn't did"],c:1,e:"Prétérit négatif : didn't + base (didn't do)."},
+  {q:'They ___ for the exam. (study)',opts:["don't study","didn't study","doesn't study","didn't studied"],c:1,e:"Prétérit négatif : didn't + base (didn't study)."},
+  {q:'He ___ the lesson. (understand)',opts:["don't understand","didn't understand","doesn't understand","didn't understood"],c:1,e:"Prétérit négatif : didn't + base (didn't understand)."},
+  {q:'I ___ to class last Monday. (go)',opts:["don't go","didn't go","doesn't go","didn't went"],c:1,e:"Prétérit négatif : didn't + base (didn't go, pas went)."},
+  {q:'My classmate ___ the notes. (take)',opts:["don't take","didn't take","doesn't take","didn't took"],c:1,e:"Prétérit négatif : didn't + base (didn't take, pas took)."},
+  {q:'We ___ our project on time. (finish)',opts:["don't finish","didn't finish","doesn't finish","didn't finished"],c:1,e:"Prétérit négatif : didn't + base (didn't finish)."},
+  {q:'The teacher ___ us any homework. (give)',opts:["don't give","didn't give","doesn't give","didn't gave"],c:1,e:"Prétérit négatif : didn't + base (didn't give, pas gave)."},
+  {q:'She ___ the test. (pass)',opts:["don't pass","didn't pass","doesn't pass","didn't passed"],c:1,e:"Prétérit négatif : didn't + base (didn't pass)."},
+  {q:'He ___ the correct answer. (find)',opts:["don't find","didn't find","doesn't find","didn't found"],c:1,e:"Prétérit négatif : didn't + base (didn't find, pas found)."},
+  {q:'They ___ their grades. (improve)',opts:["don't improve","didn't improve","doesn't improve","didn't improved"],c:1,e:"Prétérit négatif : didn't + base (didn't improve)."},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:"Mets à la forme négative du prétérit",exs:[
+{id:'prn-l2-e1',title:"Prétérit négatif – Stages – Phrases à trous",qs:[
+  {b:'He',h:"didn't + complete",a:'the task.',ans:"didn't complete",e:"didn't + base : didn't complete."},
+  {b:'They',h:"didn't + receive",a:'any training.',ans:"didn't receive",e:"didn't + base : didn't receive."},
+  {b:'She',h:"didn't + communicate",a:'well with the team.',ans:"didn't communicate",e:"didn't + base : didn't communicate."},
+  {b:'I',h:"didn't + enjoy",a:'the placement.',ans:"didn't enjoy",e:"didn't + base : didn't enjoy."},
+  {b:'My colleague',h:"didn't + come",a:'to work on Monday.',ans:"didn't come",e:"didn't + base : didn't come."},
+  {b:'We',h:"didn't + meet",a:'our objectives.',ans:"didn't meet",e:"didn't + base : didn't meet."},
+  {b:'The manager',h:"didn't + explain",a:'the rules clearly.',ans:"didn't explain",e:"didn't + base : didn't explain."},
+  {b:'She',h:"didn't + send",a:'the report.',ans:"didn't send",e:"didn't + base : didn't send."},
+  {b:'He',h:"didn't + wear",a:'the correct uniform.',ans:"didn't wear",e:"didn't + base : didn't wear."},
+  {b:'They',h:"didn't + follow",a:'the safety instructions.',ans:"didn't follow",e:"didn't + base : didn't follow."},
+]},
+{id:'prn-l2-e2',title:"Prétérit négatif – Études – Phrases à trous",qs:[
+  {b:'She',h:"didn't + submit",a:'her assignment.',ans:"didn't submit",e:"didn't + base : didn't submit."},
+  {b:'They',h:"didn't + attend",a:'the class.',ans:"didn't attend",e:"didn't + base : didn't attend."},
+  {b:'He',h:"didn't + revise",a:'for the test.',ans:"didn't revise",e:"didn't + base : didn't revise."},
+  {b:'I',h:"didn't + understand",a:'the grammar rule.',ans:"didn't understand",e:"didn't + base : didn't understand."},
+  {b:'My friend',h:"didn't + bring",a:'her textbook.',ans:"didn't bring",e:"didn't + base : didn't bring."},
+  {b:'We',h:"didn't + complete",a:'the project.',ans:"didn't complete",e:"didn't + base : didn't complete."},
+  {b:'The students',h:"didn't + listen",a:'to the teacher.',ans:"didn't listen",e:"didn't + base : didn't listen."},
+  {b:'She',h:"didn't + answer",a:'the questions correctly.',ans:"didn't answer",e:"didn't + base : didn't answer."},
+  {b:'He',h:"didn't + pass",a:'his exams.',ans:"didn't pass",e:"didn't + base : didn't pass."},
+  {b:'They',h:"didn't + pay",a:'attention in class.',ans:"didn't pay",e:"didn't + base : didn't pay."},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:"Forme la phrase négative au prétérit",exs:[
+{id:'prn-l3-e1',title:"Prétérit négatif – Stages – Remise en ordre",qs:[
+  {s:"She didn't finish her report.",e:"Sujet + didn't + base (finish) + COD."},
+  {s:"They didn't learn any useful skills.",e:"Sujet + didn't + base (learn) + COD."},
+  {s:"We didn't make a good impression.",e:"Sujet + didn't + base (make) + COD."},
+  {s:"She didn't understand the task correctly.",e:"Sujet + didn't + base (understand) + COD + adverbe."},
+  {s:"He didn't arrive on time.",e:"Sujet + didn't + base (arrive) + on time."},
+  {s:"The company didn't give us any feedback.",e:"Sujet + didn't + base (give) + COI + COD."},
+  {s:"He didn't write a professional email.",e:"Sujet + didn't + base (write) + COD."},
+  {s:"They didn't enjoy their placement.",e:"Sujet + didn't + base (enjoy) + COD."},
+  {s:"I didn't meet my internship supervisor.",e:"Sujet + didn't + base (meet) + COD."},
+  {s:"She didn't make a good first impression.",e:"Sujet + didn't + base (make) + COD."},
+]},
+{id:'prn-l3-e2',title:"Prétérit négatif – Études – Remise en ordre",qs:[
+  {s:"She didn't do her homework.",e:"Sujet + didn't + base (do) + COD."},
+  {s:"They didn't study for the exam.",e:"Sujet + didn't + base (study) + for the exam."},
+  {s:"He didn't understand the lesson.",e:"Sujet + didn't + base (understand) + COD."},
+  {s:"We didn't finish our project on time.",e:"Sujet + didn't + base (finish) + COD + on time."},
+  {s:"She didn't answer the questions correctly.",e:"Sujet + didn't + base (answer) + COD + adverbe."},
+  {s:"He didn't pass his exams.",e:"Sujet + didn't + base (pass) + COD."},
+  {s:"They didn't pay attention in class.",e:"Sujet + didn't + base (pay attention) + in class."},
+  {s:"The teacher didn't give us any homework.",e:"Sujet + didn't + base (give) + COI + COD."},
+  {s:"I didn't go to class last Monday.",e:"Sujet + didn't + base (go) + lieu + temps."},
+  {s:"He didn't find the correct answer.",e:"Sujet + didn't + base (find) + COD."},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Correcte ou incorrecte ?',exs:[
+{id:'prn-l4-e1',title:"Prétérit négatif – Stages – Trouver l'erreur",qs:[
+  {s:"She didn't finished her report.",ok:false,c:"She didn't finish her report.",e:"Après didn't → base (pas finished)."},
+  {s:"They didn't work at a company.",ok:true,c:'',e:"didn't + base (work). ✓"},
+  {s:"He didn't learned any skills.",ok:false,c:"He didn't learn any skills.",e:"Après didn't → base (pas learned)."},
+  {s:"I didn't meet the supervisor.",ok:true,c:'',e:"didn't + base (meet). ✓"},
+  {s:"We didn't made a good impression.",ok:false,c:"We didn't make a good impression.",e:"Après didn't → base (pas made)."},
+  {s:"The company didn't give us feedback.",ok:true,c:'',e:"didn't + base (give). ✓"},
+  {s:"She don't understand the task.",ok:false,c:"She didn't understand the task.",e:"Au passé → didn't (pas don't)."},
+  {s:"He didn't write a professional email.",ok:true,c:'',e:"didn't + base (write). ✓"},
+  {s:"They didn't enjoyed their placement.",ok:false,c:"They didn't enjoy their placement.",e:"Après didn't → base (pas enjoyed)."},
+  {s:"My friend didn't arrive on time.",ok:true,c:'',e:"didn't + base (arrive). ✓"},
+]},
+{id:'prn-l4-e2',title:"Prétérit négatif – Études – Trouver l'erreur",qs:[
+  {s:"She didn't did her homework.",ok:false,c:"She didn't do her homework.",e:"Après didn't → base do (pas did)."},
+  {s:"They didn't study for the exam.",ok:true,c:'',e:"didn't + base (study). ✓"},
+  {s:"He didn't understood the lesson.",ok:false,c:"He didn't understand the lesson.",e:"Après didn't → base (pas understood)."},
+  {s:"I didn't go to class last Monday.",ok:true,c:'',e:"didn't + base (go). ✓"},
+  {s:"We didn't finished our project.",ok:false,c:"We didn't finish our project.",e:"Après didn't → base (pas finished)."},
+  {s:"The teacher didn't give us any homework.",ok:true,c:'',e:"didn't + base (give). ✓"},
+  {s:"She don't pass the test.",ok:false,c:"She didn't pass the test.",e:"Au passé → didn't (pas don't)."},
+  {s:"He didn't find the correct answer.",ok:true,c:'',e:"didn't + base (find). ✓"},
+  {s:"They doesn't pay attention in class.",ok:false,c:"They didn't pay attention in class.",e:"Au passé → didn't (pas doesn't)."},
+  {s:"She didn't answer the questions correctly.",ok:true,c:'',e:"didn't + base (answer). ✓"},
+]}]}
+]},
+
+// ─── THEME 6 ─── PRÉTÉRIT INTERROGATIF / Stages + Études ─────────
+{id:'pret-int',name:'Prétérit',sub:'Forme interrogative',lex:'🎓 Stages & Études',icon:'🎓',color:'#1C307C',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:'Choisis Did pour la question au prétérit',exs:[
+{id:'pri-l1-e1',title:'Prétérit interrogatif – Stages',qs:[
+  {q:'___ she finish her report on time?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ they work at a big company?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ he learn useful skills?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ you enjoy your placement?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ your supervisor give you feedback?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ we make a good impression?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ the company provide training?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ she understand the tasks?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ he write a report?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ they like their internship?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+]},
+{id:'pri-l1-e2',title:'Prétérit interrogatif – Études',qs:[
+  {q:'___ she pass her exam?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ they study for the test?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ he understand the lesson?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ you go to class last Monday?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ your teacher explain it well?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ we finish the project on time?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ the students listen carefully?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ she answer all the questions?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ he find the correct answer?',opts:['Do','Did','Does','Was'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+  {q:'___ they improve their grades?',opts:['Do','Did','Does','Were'],c:1,e:"Au prétérit interrogatif → Did + sujet + base."},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:"Complète avec Did pour la question",exs:[
+{id:'pri-l2-e1',title:"Prétérit interrogatif – Stages – Phrases à trous",qs:[
+  {b:'',h:'Did',a:'she finish the report on time?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'they work at a big company?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'he learn useful skills?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'you enjoy your placement?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'your supervisor give you feedback?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'we make a good impression?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'the company provide training?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'she understand the tasks?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'he write a report?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'they complete the project?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+]},
+{id:'pri-l2-e2',title:"Prétérit interrogatif – Études – Phrases à trous",qs:[
+  {b:'',h:'Did',a:'she pass her exam?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'they study for the test?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'he understand the lesson?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'you go to class last week?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'your teacher explain it clearly?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'we finish the project on time?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'the students listen carefully?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'she answer all the questions?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'he find the correct answer?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+  {b:'',h:'Did',a:'they improve their grades?',ans:'Did',e:"Au prétérit interrogatif → Did + sujet + base."},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:"Forme la question au prétérit",exs:[
+{id:'pri-l3-e1',title:"Prétérit interrogatif – Stages – Remise en ordre",qs:[
+  {s:"Did she finish her report on time?",e:"Did + she + base (finish) + ... + ?"},
+  {s:"Did they work at a big company?",e:"Did + they + base (work) + ... + ?"},
+  {s:"Did he learn useful skills?",e:"Did + he + base (learn) + COD + ?"},
+  {s:"Did you enjoy your placement?",e:"Did + you + base (enjoy) + COD + ?"},
+  {s:"Did your supervisor give you feedback?",e:"Did + your supervisor + base (give) + ... + ?"},
+  {s:"Did we make a good impression?",e:"Did + we + base (make) + COD + ?"},
+  {s:"Did the company provide training?",e:"Did + the company + base (provide) + COD + ?"},
+  {s:"Did she understand the tasks?",e:"Did + she + base (understand) + COD + ?"},
+  {s:"Did he write a report?",e:"Did + he + base (write) + COD + ?"},
+  {s:"Did they like their internship?",e:"Did + they + base (like) + COD + ?"},
+]},
+{id:'pri-l3-e2',title:"Prétérit interrogatif – Études – Remise en ordre",qs:[
+  {s:"Did she pass her exam?",e:"Did + she + base (pass) + COD + ?"},
+  {s:"Did they study for the test?",e:"Did + they + base (study) + for the test + ?"},
+  {s:"Did he understand the lesson?",e:"Did + he + base (understand) + COD + ?"},
+  {s:"Did you go to class last Monday?",e:"Did + you + base (go) + lieu + temps + ?"},
+  {s:"Did your teacher explain it well?",e:"Did + your teacher + base (explain) + ... + ?"},
+  {s:"Did we finish the project on time?",e:"Did + we + base (finish) + COD + on time + ?"},
+  {s:"Did the students listen carefully?",e:"Did + the students + base (listen) + adverbe + ?"},
+  {s:"Did she answer all the questions?",e:"Did + she + base (answer) + all the questions + ?"},
+  {s:"Did he find the correct answer?",e:"Did + he + base (find) + COD + ?"},
+  {s:"Did they improve their grades?",e:"Did + they + base (improve) + COD + ?"},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Correcte ou incorrecte ?',exs:[
+{id:'pri-l4-e1',title:"Prétérit interrogatif – Stages – Trouver l'erreur",qs:[
+  {s:"Did she finished her report?",ok:false,c:"Did she finish her report?",e:"Après Did → base (pas finished)."},
+  {s:"Did they work at a company?",ok:true,c:'',e:"Did + they + base (work). ✓"},
+  {s:"Does he learn useful skills?",ok:false,c:"Did he learn useful skills?",e:"Au passé → Did (pas Does)."},
+  {s:"Did you enjoy your placement?",ok:true,c:'',e:"Did + you + base (enjoy). ✓"},
+  {s:"Did the company gave feedback?",ok:false,c:"Did the company give feedback?",e:"Après Did → base give (pas gave)."},
+  {s:"Did we make a good impression?",ok:true,c:'',e:"Did + we + base (make). ✓"},
+  {s:"Did she understood the tasks?",ok:false,c:"Did she understand the tasks?",e:"Après Did → base (pas understood)."},
+  {s:"Did he write a report?",ok:true,c:'',e:"Did + he + base (write). ✓"},
+  {s:"Do they enjoy their internship?",ok:false,c:"Did they enjoy their internship?",e:"Au passé → Did (pas Do)."},
+  {s:"Did they complete the project?",ok:true,c:'',e:"Did + they + base (complete). ✓"},
+]},
+{id:'pri-l4-e2',title:"Prétérit interrogatif – Études – Trouver l'erreur",qs:[
+  {s:"Did she passed her exam?",ok:false,c:"Did she pass her exam?",e:"Après Did → base (pas passed)."},
+  {s:"Did they study for the test?",ok:true,c:'',e:"Did + they + base (study). ✓"},
+  {s:"Did he understood the lesson?",ok:false,c:"Did he understand the lesson?",e:"Après Did → base (pas understood)."},
+  {s:"Did you went to class last Monday?",ok:false,c:"Did you go to class last Monday?",e:"Après Did → base go (pas went)."},
+  {s:"Did your teacher explain it well?",ok:true,c:'',e:"Did + your teacher + base (explain). ✓"},
+  {s:"Does we finish the project on time?",ok:false,c:"Did we finish the project on time?",e:"Au passé → Did (pas Does)."},
+  {s:"Did the students listen?",ok:true,c:'',e:"Did + the students + base (listen). ✓"},
+  {s:"Did she answered all the questions?",ok:false,c:"Did she answer all the questions?",e:"Après Did → base (pas answered)."},
+  {s:"Did he find the correct answer?",ok:true,c:'',e:"Did + he + base (find). ✓"},
+  {s:"Did they improved their grades?",ok:false,c:"Did they improve their grades?",e:"Après Did → base (pas improved)."},
+]}]}
+]},
+
+// ─── THEME 7 ─── CONSTRUCTION DES PHRASES / Monde du travail ─────
+{id:'construction',name:'Construction des phrases',sub:'Syntaxe anglaise',lex:'💼 Monde du travail',icon:'💼',color:'#2C4A6A',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:'Choisis la phrase correctement construite',exs:[{
+  id:'con-l1',title:'Construction des phrases – Monde du travail',qs:[
+  {q:'Laquelle est correcte ?',opts:['Works she at a factory.','She at a factory works.','She works at a factory.','At a factory works she.'],c:2,e:'En anglais : Sujet (She) + Verbe (works) + Complément (at a factory).'},
+  {q:'Laquelle est correcte ?',opts:['My manager not is here.','My manager is not here.','Not is my manager here.','My manager here is not.'],c:1,e:"Avec 'be' : Sujet + is/am/are + not."},
+  {q:'___ you work night shifts?',opts:['Are','Do','Does','Did'],c:1,e:'Question au présent simple avec you : Do + you + base.'},
+  {q:'Laquelle est correcte ?',opts:['She always is professional.','Always she is professional.','She is always professional.','Professional always is she.'],c:2,e:"L'adverbe de fréquence (always) se place après le verbe 'be'."},
+  {q:'He ___ to work by bus.',opts:['go','goes','going','is go'],c:1,e:'He → goes (présent simple, +s).'},
+  {q:'Laquelle est correcte ?',opts:['My colleagues works hard.','Hard work my colleagues.','My colleagues work hard.','My colleagues hardly work.'],c:2,e:'My colleagues = they → base : work (pas works).'},
+  {q:'She ___ like her new job.',opts:["isn't","don't","doesn't","aren't"],c:2,e:"Forme négative avec she → doesn't."},
+  {q:'What time ___ the office open?',opts:['do','does','is','did'],c:1,e:'The office = it → Does pour les questions au présent.'},
+  {q:'My boss ___ me a raise last year.',opts:['give','gave','gives','given'],c:1,e:"'Last year' indique le passé → prétérit : gave."},
+  {q:'___ do you usually start work?',opts:['Where','What time','How','Why'],c:1,e:'On demande une heure → What time.'},
+  {q:'Laquelle est correcte ?',opts:['I have work on Saturdays.','I must to work on Saturdays.','I have to work on Saturdays.','I working Saturdays have.'],c:2,e:'have to + verbe base = être obligé de.'},
+  {q:'They ___ a meeting every Monday morning.',opts:['have','has','are','do'],c:0,e:'They → have (base, pas de -s avec they).'},
+  {q:'She ___ been working here for five years.',opts:['have','has','had','is'],c:1,e:'She → has (present perfect : has + participe passé).'},
+  {q:'Laquelle est correcte ?',opts:['He worked late yesterday.','He yesterday worked late.','He worked yesterday late.','Late he worked yesterday.'],c:0,e:"Le complément de temps peut être en fin de phrase : he worked late yesterday."},
+  {q:'The office ___ at 6pm every day.',opts:['close','closes','closing','closed'],c:1,e:'The office = it → closes (présent simple, +s).'},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:'Conjugue le verbe correctement',exs:[{
+  id:'con-l2',title:'Construction des phrases – Phrases à trous',qs:[
+  {b:'She',h:'work',a:'at a supermarket.',ans:'works',e:'She → +s : works.'},
+  {b:'They',h:"have",a:'a meeting every Friday.',ans:'have',e:'They → base : have.'},
+  {b:'The manager',h:'send',a:'an email yesterday.',ans:'sent',e:'Yesterday → prétérit : sent (irrégulier).'},
+  {b:'My boss',h:'be',a:'always punctual.',ans:'is always',e:'My boss = he → is always (be → is, adverbe après be).'},
+  {b:'She',h:"not/enjoy",a:'working night shifts.',ans:"doesn't enjoy",e:"She → doesn't + base : doesn't enjoy."},
+  {b:'I',h:'have to',a:'work on Saturdays.',ans:'have to',e:"have to + base = être obligé de. Avec I → have to."},
+  {b:'The office',h:'close',a:'at 6pm.',ans:'closes',e:'The office = it → +s : closes.'},
+  {b:'We',h:'work',a:'overtime last week.',ans:'worked',e:'Last week → prétérit : worked (+ed).'},
+  {b:'He',h:'go',a:'to work by bus every day.',ans:'goes',e:'He → +s : goes.'},
+  {b:'My colleagues',h:'travel',a:'a lot for work.',ans:'travel',e:'My colleagues = they → base : travel.'},
+  {b:'She',h:'ask',a:'for a pay rise last month.',ans:'asked',e:'Last month → prétérit : asked (+ed).'},
+  {b:'',h:'Do/Does',a:'they work night shifts?',ans:'Do',e:'They → Do pour les questions.'},
+  {b:'He',h:"not/understand",a:'the instructions.',ans:"didn't understand",e:"Contexte passé → didn't + base."},
+  {b:'My boss',h:'give',a:'me clear instructions.',ans:'gives',e:'My boss = he → +s : gives.'},
+  {b:'They',h:'receive',a:'good training.',ans:'receive',e:'They → base : receive.'},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:'Construis la phrase correctement',exs:[{
+  id:'con-l3',title:'Construction des phrases – Remise en ordre',qs:[
+  {s:'She works at a supermarket.',e:'Sujet (She) + Verbe (works) + lieu (at a supermarket).'},
+  {s:'They have a meeting every Friday.',e:'Sujet + Verbe (have) + COD + every Friday.'},
+  {s:'The manager sent an email yesterday.',e:'Sujet + Verbe prétérit (sent) + COD + yesterday.'},
+  {s:'My boss is always punctual.',e:'Sujet + is + always + adjectif. (always après be)'},
+  {s:'Do they work night shifts?',e:'Do + they + base (work) + COD + ?'},
+  {s:'He goes to work by bus.',e:'Sujet + Verbe (goes) + to work + by bus.'},
+  {s:'We worked overtime last week.',e:'Sujet + Verbe prétérit (worked) + COD + last week.'},
+  {s:'She asked for a pay rise.',e:'Sujet + Verbe prétérit (asked) + for a pay rise.'},
+  {s:'My colleagues work hard.',e:'Sujet (My colleagues) + Verbe (work) + adverbe (hard).'},
+  {s:'What time does the office open?',e:'What time + does + the office + base (open) + ?'},
+  {s:'I have to work on Saturdays.',e:'Sujet + have to + base (work) + on Saturdays.'},
+  {s:'She doesn\'t enjoy working night shifts.',e:"Sujet + doesn't + base (enjoy) + V-ing."},
+  {s:'He didn\'t understand the instructions.',e:"Sujet + didn't + base (understand) + COD."},
+  {s:'My boss gave me a raise.',e:'Sujet + Verbe prétérit (gave) + COI + COD.'},
+  {s:'They receive good training.',e:'Sujet + Verbe (receive) + COD.'},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Correcte ou incorrecte ?',exs:[{
+  id:'con-l4',title:"Construction des phrases – Trouver l'erreur",qs:[
+  {s:'She work at a supermarket.',ok:false,c:'She works at a supermarket.',e:'She → +s : works.'},
+  {s:'They have a meeting every Friday.',ok:true,c:'',e:'They → base (have). ✓'},
+  {s:'He go to work by bus.',ok:false,c:'He goes to work by bus.',e:'He → +s : goes.'},
+  {s:'My boss is always punctual.',ok:true,c:'',e:'is always punctual (adverbe après be). ✓'},
+  {s:'Do they works night shifts?',ok:false,c:'Do they work night shifts?',e:'Après Do → base work (pas works).'},
+  {s:"She doesn't enjoy working.",ok:true,c:'',e:"She → doesn't + base (enjoy). ✓"},
+  {s:'I have to work on Saturdays.',ok:true,c:'',e:'have to + base. ✓'},
+  {s:'The manager sended an email.',ok:false,c:'The manager sent an email.',e:'send est irrégulier → sent (pas sended).'},
+  {s:'They receive good training.',ok:true,c:'',e:'They → base (receive). ✓'},
+  {s:'My colleagues works hard.',ok:false,c:'My colleagues work hard.',e:'My colleagues = they → base work (pas works).'},
+  {s:'She asked for a pay rise.',ok:true,c:'',e:'Prétérit régulier : asked. ✓'},
+  {s:'Do the office open at 6pm?',ok:false,c:'Does the office open at 6pm?',e:'The office = it → Does (pas Do).'},
+  {s:'We worked overtime last week.',ok:true,c:'',e:'Prétérit régulier : worked. ✓'},
+  {s:"He didn't went to work yesterday.",ok:false,c:"He didn't go to work yesterday.",e:"Après didn't → base go (pas went)."},
+  {s:'She has been working here for five years.',ok:true,c:'',e:'She → has (present perfect). ✓'},
+]}]}
+]},
+
+// ─── THEME 8 ─── QUESTIONS EN WH / Réseaux sociaux + Technologies ─
+{id:'wh-questions',name:'Questions en WH',sub:'What, When, Where, Why, Who, How',lex:'📱 Réseaux & Technologies',icon:'📱',color:'#1C6A5A',
+levels:[
+{n:1,type:'qcm',label:'QCM – Choix multiples',badge:'⚙️',bc:'stone',desc:'Choisis le bon mot interrogatif (WH)',exs:[
+{id:'wh-l1-e1',title:'Questions WH – Verbe Be – Réseaux sociaux',qs:[
+  {q:'___ is your favourite social media?',opts:['Who','What','Where','When'],c:1,e:"On demande une chose → What (quoi)."},
+  {q:'___ are your followers from?',opts:['What','Who','Where','When'],c:2,e:"On demande un lieu → Where (où)."},
+  {q:'___ is your profile picture?',opts:['When','Where','What','Why'],c:2,e:"On demande une chose → What (quoi)."},
+  {q:'___ are these photos so popular?',opts:['Who','What','Where','Why'],c:3,e:"On demande une raison → Why (pourquoi)."},
+  {q:'___ often is she online?',opts:['What','Where','How','Who'],c:2,e:"How often = à quelle fréquence."},
+  {q:'___ is the best time to post?',opts:['Where','When','Who','How'],c:1,e:"On demande un moment → When (quand)."},
+  {q:'___ is the most popular influencer?',opts:['What','When','Who','Where'],c:2,e:"On demande une personne → Who (qui)."},
+  {q:'___ long is a typical TikTok video?',opts:['What','How','Where','Why'],c:1,e:"How long = quelle est la durée."},
+  {q:'___ is your account private?',opts:['Where','What','When','Why'],c:3,e:"On demande une raison → Why (pourquoi)."},
+  {q:'___ are the new features of this app?',opts:['What','Where','Who','When'],c:0,e:"On demande des choses → What (quoi)."},
+]},
+{id:'wh-l1-e2',title:'Questions WH – Autres verbes – Technologies',qs:[
+  {q:'___ do you use your phone the most?',opts:['Who','Why','When','What'],c:2,e:"On demande un moment → When (quand)."},
+  {q:'___ does she use her computer for?',opts:['Where','What','Who','How'],c:1,e:"On demande une chose → What (quoi)."},
+  {q:'___ often do you check your notifications?',opts:['What','How','Who','When'],c:1,e:"How often = à quelle fréquence."},
+  {q:'___ does this app work?',opts:['What','Where','How','Why'],c:2,e:"On demande le fonctionnement → How (comment)."},
+  {q:'___ invented the internet?',opts:['What','When','Who','Where'],c:2,e:"On demande une personne → Who (qui)."},
+  {q:'___ does the battery last?',opts:['How long','How much','Where','When'],c:0,e:"How long = quelle est la durée."},
+  {q:'___ do you download apps?',opts:['Who','Where','What','Why'],c:1,e:"On demande un lieu → Where (où)."},
+  {q:'___ did they launch the new model?',opts:['Who','Where','How','When'],c:3,e:"On demande un moment → When (quand)."},
+  {q:'___ does it cost to upgrade?',opts:['How much','How many','Where','Who'],c:0,e:"On demande un prix → How much (combien)."},
+  {q:'___ do you prefer this phone?',opts:['What','Where','Why','Who'],c:2,e:"On demande une raison → Why (pourquoi)."},
+]}]},
+{n:2,type:'blank',label:'Phrases à trous',badge:'🪨',bc:'iron',desc:'Complète avec le bon mot interrogatif',exs:[
+{id:'wh-l2-e1',title:'Questions WH – Réseaux sociaux – Phrases à trous',qs:[
+  {b:'',h:'What/Where/When/Why/Who/How',a:'is your username?',ans:'What',e:'On demande une chose → What.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'are you from?',ans:'Where',e:'On demande un lieu → Where.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'is your account private?',ans:'Why',e:'On demande une raison → Why.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'is the best time to post?',ans:'When',e:'On demande un moment → When.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'is the most followed person on Instagram?',ans:'Who',e:'On demande une personne → Who.'},
+  {b:'',h:'How many / How much / How often / How long',a:'followers does she have?',ans:'How many',e:'How many + nom pluriel = combien de...'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'are these comments so negative?',ans:'Why',e:'On demande une raison → Why.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'is your profile picture taken?',ans:'Where',e:'On demande un lieu → Where.'},
+  {b:'',h:'How many / How much / How often / How long',a:'has this video been online?',ans:'How long',e:'How long = depuis combien de temps.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'is your favourite type of content?',ans:'What',e:'On demande une chose → What.'},
+]},
+{id:'wh-l2-e2',title:'Questions WH – Technologies – Phrases à trous',qs:[
+  {b:'',h:'What/Where/When/Why/Who/How',a:'do you use your tablet for?',ans:'What',e:'On demande une chose → What.'},
+  {b:'',h:'How many / How much / How often / How long',a:'do you charge your phone?',ans:'How often',e:'How often = à quelle fréquence.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'does this software work?',ans:'How',e:'On demande le fonctionnement → How.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'designed this app?',ans:'Who',e:'On demande une personne → Who.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'did they release the update?',ans:'When',e:'On demande un moment → When.'},
+  {b:'',h:'How many / How much / How often / How long',a:'does the subscription cost?',ans:'How much',e:'How much = combien (prix).'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'do you store your photos?',ans:'Where',e:'On demande un lieu → Where.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'do you prefer this brand?',ans:'Why',e:'On demande une raison → Why.'},
+  {b:'',h:'How many / How much / How often / How long',a:'does the battery last?',ans:'How long',e:'How long = quelle est la durée.'},
+  {b:'',h:'What/Where/When/Why/Who/How',a:'can I download this app?',ans:'Where',e:'On demande un lieu → Where.'},
+]}]},
+{n:3,type:'order',label:"Remettre dans l'ordre",badge:'🥇',bc:'gold',desc:'Forme la question WH correcte',exs:[
+{id:'wh-l3-e1',title:'Questions WH – Réseaux sociaux – Remise en ordre',qs:[
+  {s:'What is your username?',e:'What + is + sujet + ?'},
+  {s:'Where are you from?',e:'Where + are + sujet + ?'},
+  {s:'Why is your account public?',e:'Why + is + sujet + adjectif + ?'},
+  {s:'When is the best time to post?',e:'When + is + sujet + ?'},
+  {s:'Who is the most followed person on Instagram?',e:'Who + is + sujet + ?'},
+  {s:'How many followers does she have?',e:'How many + nom + does + sujet + base + ?'},
+  {s:'Why are these comments so negative?',e:'Why + are + sujet + si + adjectif + ?'},
+  {s:'Where is your profile picture taken?',e:'Where + is + sujet + participe passé + ?'},
+  {s:'How long has this video been online?',e:'How long + has + sujet + been + adverbe + ?'},
+  {s:'What is your favourite type of content?',e:'What + is + sujet + ?'},
+]},
+{id:'wh-l3-e2',title:'Questions WH – Technologies – Remise en ordre',qs:[
+  {s:'What do you use your tablet for?',e:'What + do + sujet + base + COD + for + ?'},
+  {s:'How often do you charge your phone?',e:'How often + do + sujet + base + COD + ?'},
+  {s:'How does this software work?',e:'How + does + sujet + base + ?'},
+  {s:'Who designed this app?',e:'Who + verbe prétérit (designed) + COD + ?'},
+  {s:'When did they release the update?',e:'When + did + sujet + base (release) + COD + ?'},
+  {s:'How much does the subscription cost?',e:'How much + does + sujet + base + ?'},
+  {s:'Where do you store your photos?',e:'Where + do + sujet + base + COD + ?'},
+  {s:'Why do you prefer this brand?',e:'Why + do + sujet + base + COD + ?'},
+  {s:'How long does the battery last?',e:'How long + does + sujet + base + ?'},
+  {s:'Where can I download this app?',e:'Where + can + sujet + base + COD + ?'},
+]}]},
+{n:4,type:'error',label:"Trouver l'erreur",badge:'💎',bc:'diamond',desc:'Correcte ou incorrecte ?',exs:[
+{id:'wh-l4-e1',title:"Questions WH – Réseaux sociaux – Trouver l'erreur",qs:[
+  {s:'What your username is?',ok:false,c:'What is your username?',e:'Ordre WH : What + verbe (is) + sujet + ?'},
+  {s:'Where are you from?',ok:true,c:'',e:'Where + are + sujet + from. ✓'},
+  {s:'Why is your account public?',ok:true,c:'',e:'Why + is + sujet + adjectif. ✓'},
+  {s:'Who is the most followed person?',ok:true,c:'',e:'Who + is + sujet. ✓'},
+  {s:'How many followers does she has?',ok:false,c:'How many followers does she have?',e:"Après does → base have (pas has)."},
+  {s:'When is the best time to post?',ok:true,c:'',e:'When + is + sujet. ✓'},
+  {s:'Where is your profile picture taken?',ok:true,c:'',e:'Where + is + sujet + participe passé. ✓'},
+  {s:'Why are these comments so negative?',ok:true,c:'',e:'Why + are + sujet + adjectif. ✓'},
+  {s:'How long has been this video online?',ok:false,c:'How long has this video been online?',e:"Ordre : How long + has + sujet + been + ..."},
+  {s:'What your favourite content is?',ok:false,c:'What is your favourite content?',e:'Ordre WH : What + is + sujet + ?'},
+]},
+{id:'wh-l4-e2',title:"Questions WH – Technologies – Trouver l'erreur",qs:[
+  {s:'What do you use your tablet for?',ok:true,c:'',e:'What + do + sujet + base + for. ✓'},
+  {s:'How often do you charges your phone?',ok:false,c:'How often do you charge your phone?',e:"Après do → base charge (pas charges)."},
+  {s:'How this software does work?',ok:false,c:'How does this software work?',e:'Ordre : How + does + sujet + base + ?'},
+  {s:'Who designed this app?',ok:true,c:'',e:'Who + verbe prétérit (designed). ✓'},
+  {s:'When did they release the update?',ok:true,c:'',e:'When + did + sujet + base. ✓'},
+  {s:'How much does the subscription costs?',ok:false,c:'How much does the subscription cost?',e:"Après does → base cost (pas costs)."},
+  {s:'Where do you store your photos?',ok:true,c:'',e:'Where + do + sujet + base + COD. ✓'},
+  {s:'Why do you prefer this brand?',ok:true,c:'',e:'Why + do + sujet + base + COD. ✓'},
+  {s:'How long the battery does last?',ok:false,c:'How long does the battery last?',e:'Ordre : How long + does + sujet + base + ?'},
+  {s:'Where can I download this app?',ok:true,c:'',e:'Where + can + sujet + base + COD. ✓'},
+]}]}
+]}
+];
+
+// ═══════════════════════════════════════════════════════════════
+//  APP STATE
+// ═══════════════════════════════════════════════════════════════
+
+let S = {
+  page:'home',
+  student:null,        // {id,fn,ln,cls}
+  theme:null,          // THEMES[i]
+  level:null,          // levels[j]
+  exercise:null,       // exs[k]
+  qIdx:0,             // current question index
+  answers:[],          // [{q,user,correct,ok}]
+  wordOrder:[],        // chips in answer zone
+  wordBank:[],         // chips remaining
+  locked:false,        // after answering, before next
+  progress:{}          // loaded from localStorage
+};
+
+// ─── LocalStorage helpers ──────────────────────────────────────
+function saveProgress(){try{localStorage.setItem('gramy_progress',JSON.stringify(S.progress));}catch(e){}}
+function loadProgress(){try{const d=localStorage.getItem('gramy_progress');if(d)S.progress=JSON.parse(d);}catch(e){}}
+function getStudentCode(){return localStorage.getItem('gramy_student_code')||'1234';}
+function setStudentCode(c){localStorage.setItem('gramy_student_code',c);}
+function getStudents(){try{return JSON.parse(localStorage.getItem('gramy_students')||'{}');}catch(e){return {};}}
+function saveStudents(obj){localStorage.setItem('gramy_students',JSON.stringify(obj));}
+
+// progress for a student: progress[studentId][themeId][levelN][exId] = {score,total,answers}
+function getExProgress(sid,tid,ln,eid){
+  if(!S.progress[sid])return null;
+  if(!S.progress[sid][tid])return null;
+  if(!S.progress[sid][tid][ln])return null;
+  return S.progress[sid][tid][ln][eid]||null;
+}
+function setExProgress(sid,tid,ln,eid,data){
+  if(!S.progress[sid])S.progress[sid]={};
+  if(!S.progress[sid][tid])S.progress[sid][tid]={};
+  if(!S.progress[sid][tid][ln])S.progress[sid][tid][ln]={};
+  S.progress[sid][tid][ln][eid]=data;
+  saveProgress();
+}
+function isLevelDone(sid,theme,ln){
+  const lvl=theme.levels.find(l=>l.n===ln);
+  if(!lvl)return false;
+  return lvl.exs.every(ex=>!!getExProgress(sid,theme.id,ln,ex.id));
+}
+function isLevelUnlocked(sid,theme,ln){
+  if(ln===1)return true;
+  return isLevelDone(sid,theme,ln-1);
+}
+function themeProgress(sid,theme){
+  let done=0;
+  for(let l of theme.levels){if(isLevelDone(sid,theme,l.n))done++;}
+  return done/theme.levels.length;
+}
+
+// ─── Navigation ───────────────────────────────────────────────
+function navigate(page,data){
+  S.page=page;
+  if(data)Object.assign(S,data);
+  render();
+  window.scrollTo(0,0);
+}
+
+// ─── Encourage messages ────────────────────────────────────────
+const ENCOURAGEMENTS=['💪 Tu es un champion !','⚔️ Aventurier du vocabulaire !','🏆 Keep it up !','🌟 Excellent travail !','💎 Tu mènes à la victoire !','🔥 On fonce, héros !','⭐ Bravo, continue !','🎉 Super boulot !'];
+function randomEnc(){return ENCOURAGEMENTS[Math.floor(Math.random()*ENCOURAGEMENTS.length)];}
+
+function getScoreMsg(score,total){
+  const pct=score/total;
+  if(pct===1)return'🏆 Parfait ! Score maximal ! Tu es une LÉGENDE !';
+  if(pct>=0.8)return'⭐ Excellent ! Tu maîtrises ce niveau !';
+  if(pct>=0.6)return'💪 Bien joué ! Continue tes efforts !';
+  if(pct>=0.4)return'🔥 C\'est un début ! Révise et recommence !';
+  return'💡 Continue, tu vas y arriver ! La pratique fait le maître !';
+}
+function getStars(score,total){
+  const p=score/total;
+  if(p===1)return'⭐⭐⭐';
+  if(p>=0.7)return'⭐⭐';
+  return'⭐';
+}
+
+// ─── Toast / Burst ─────────────────────────────────────────────
+function toast(msg,dur=2500){
+  const t=document.createElement('div');t.className='toast';t.textContent=msg;
+  document.body.appendChild(t);setTimeout(()=>t.remove(),dur);
+}
+function burst(emoji){
+  const b=document.createElement('div');b.className='burst';b.textContent=emoji;
+  document.body.appendChild(b);setTimeout(()=>b.remove(),700);
+}
+
+// ─── Scramble words ────────────────────────────────────────────
+function scramble(sentence,seed){
+  const w=sentence.replace(/[?!.]/g,'').split(' ');
+  const a=[...w];
+  let s=seed+42;
+  for(let i=a.length-1;i>0;i--){
+    s=(s*1664525+1013904223)&0x7fffffff;
+    const j=s%(i+1);
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  // ensure at least one position differs
+  if(a.join(' ')===w.join(' ')&&a.length>1){[a[0],a[1]]=[a[1],a[0]];}
+  return a;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  RENDER
+// ═══════════════════════════════════════════════════════════════
+const app=()=>document.getElementById('app');
+function render(){app().innerHTML=pages[S.page]?pages[S.page]():'<p>Page introuvable</p>';}
+
+const pages={
+// ─── HOME ─────────────────────────────────────────────────────
+home:()=>`
+<div class="home-wrap">
+  <div class="home-title">⚔️ GRAMY ⚔️</div>
+  <div class="home-sub">Grammaire Anglaise – Bac Pro 2nde<br>🟩🟫 Construis ton armure grammaticale 🟫🟩</div>
+  <div class="home-cards">
+    <div class="home-card" onclick="navigate('teacher_login')">
+      <div class="hc-icon">🧑‍🏫</div>
+      <h2>Espace Professeur</h2>
+      <p>Gérer les élèves, les codes d'accès et les exercices</p>
+    </div>
+    <div class="home-card" onclick="navigate('student_login')">
+      <div class="hc-icon">🧑‍🎓</div>
+      <h2>Espace Élève</h2>
+      <p>Accéder aux exercices et progresser niveau par niveau</p>
+    </div>
+  </div>
+  <div style="font-size:.4rem;color:var(--text-dim);margin-top:1rem">⚔️ Arme-toi de grammaire et conquiers l'anglais ! ⚔️</div>
+</div>`,
+
+// ─── TEACHER LOGIN ────────────────────────────────────────────
+teacher_login:()=>`
+<div class="nav-back" onclick="navigate('home')">← Retour</div>
+<div class="login-wrap mc-box" style="padding:1.5rem">
+  <h2>🧑‍🏫 Espace Professeur</h2>
+  <div class="sep"></div>
+  <div class="form-group">
+    <label>Code professeur</label>
+    <input type="password" id="tcode" placeholder="••••" maxlength="4" onkeydown="if(event.key==='Enter')teacherLogin()">
+    <div class="hint">Code à 4 chiffres</div>
+  </div>
+  <div id="tmsg"></div>
+  <div class="sep"></div>
+  <button class="mc-btn green" onclick="teacherLogin()" style="width:100%">🔓 Se connecter</button>
+</div>`,
+
+// ─── TEACHER DASHBOARD ────────────────────────────────────────
+teacher_dash:()=>{
+  const students=getStudents();
+  const studentCode=getStudentCode();
+  let rows='';
+  const ids=Object.keys(students);
+  if(ids.length===0){rows='<tr><td colspan="4" style="text-align:center;color:var(--text-dim)">Aucun élève connecté pour l\'instant</td></tr>';}
+  else{
+    ids.forEach(id=>{
+      const stu=students[id];
+      const prog=S.progress[id]||{};
+      let themeDones='';
+      THEMES.forEach(t=>{
+        if(prog[t.id]){
+          const done=Object.keys(prog[t.id]).length;
+          if(done>0)themeDones+=`<span class="theme-tag">${t.icon} N${Object.keys(prog[t.id]).join(',')}</span>`;
+        }
+      });
+      rows+=`<tr><td>${stu.fn} ${stu.ln}</td><td>${stu.cls}</td><td>${stu.lastSeen||'—'}</td><td>${themeDones||'Aucun exercice'}</td></tr>`;
+    });
+  }
+  // Count existing custom exercises per theme/level
+  let customCount=0;
+  THEMES.forEach(t=>t.levels.forEach(l=>{if(l.exs.length>l._baseCount)customCount+=l.exs.length-l._baseCount;}));
+  return`
+<div class="nav-back" onclick="navigate('home')">← Accueil</div>
+<div class="page-header"><h1>🧑‍🏫 Tableau de bord</h1><p>Gérez votre classe et les accès élèves</p></div>
+
+<div class="teacher-section">
+  <h2>🔑 Code d'accès élèves</h2>
+  <p style="font-size:.42rem;color:var(--text-dim);margin-bottom:1rem;line-height:2">Code actuel : <span style="color:var(--gold);font-size:.7rem">${studentCode}</span></p>
+  <div class="form-row">
+    <div class="form-group"><label>Nouveau code (4 chiffres min.)</label><input type="text" id="newcode" placeholder="ex: 2025" maxlength="8" value="${studentCode}"></div>
+    <div style="display:flex;align-items:flex-end;margin-bottom:1.2rem"><button class="mc-btn gold" onclick="changeStudentCode()">💾 Enregistrer</button></div>
+  </div>
+  <div id="code-msg"></div>
+</div>
+
+<div class="teacher-section">
+  <h2>👥 Élèves connectés (${ids.length})</h2>
+  <div style="overflow-x:auto">
+    <table class="stu-table">
+      <thead><tr><th>Nom</th><th>Classe</th><th>Dernière connexion</th><th>Progression</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+  </div>
+  <div style="margin-top:1rem"><button class="mc-btn red" onclick="if(confirm('Effacer tous les progrès ? Cette action est irréversible.'))resetAll()">🗑️ Réinitialiser tout</button></div>
+</div>
+
+<div class="teacher-section">
+  <h2>➕ Ajouter des exercices (via IA)</h2>
+
+  <div style="background:rgba(75,223,232,0.08);border:2px solid var(--diamond);padding:1rem;margin-bottom:1.2rem;font-size:.42rem;line-height:2.2;color:var(--text-dim)">
+    <div style="color:var(--diamond);font-size:.5rem;margin-bottom:.5rem">💡 Comment ça marche ?</div>
+    Les exercices ajoutés ici sont <strong style="color:var(--gold)">intégrés directement dans le fichier index.html</strong> que vous téléchargez.<br>
+    Il suffit ensuite de <strong style="color:var(--gold)">remplacer le fichier sur GitHub</strong> → Vercel redéploie automatiquement → <strong style="color:var(--green)">tous les élèves voient les nouveaux exercices</strong>.<br><br>
+    <strong style="color:var(--gold)">Mode d'emploi :</strong><br>
+    1️⃣ Demandez à Claude de générer des exercices selon le format ci-dessous<br>
+    2️⃣ Collez le JSON dans le champ de texte<br>
+    3️⃣ Choisissez le thème et le niveau cibles<br>
+    4️⃣ Cliquez <em>Prévisualiser</em> pour vérifier, puis <em>Télécharger le nouveau index.html</em><br>
+    5️⃣ Remplacez le fichier sur GitHub → les élèves reçoivent la mise à jour au prochain chargement
+  </div>
+
+  <div style="background:#0A0A20;border:2px solid var(--stone-dk);padding:.8rem;font-size:.35rem;color:var(--text-dim);margin-bottom:1rem;overflow:auto;max-height:130px;line-height:2">
+    <span style="color:var(--gold)">// Format QCM :</span> {"id":"mon-id","title":"Titre exercice","qs":[{"q":"She ___ pizza.","opts":["eat","eats","eating","eaten"],"c":1,"e":"she → +s"}]}<br>
+    <span style="color:var(--gold)">// Format BLANK :</span> {"id":"mon-id","title":"Titre","qs":[{"b":"My father","h":"cook","a":"pasta.","ans":"cooks","e":"he → +s"}]}<br>
+    <span style="color:var(--gold)">// Format ORDER :</span> {"id":"mon-id","title":"Titre","qs":[{"s":"She eats cereals every morning.","e":"Sujet + Verbe + ..."}]}<br>
+    <span style="color:var(--gold)">// Format ERROR :</span> {"id":"mon-id","title":"Titre","qs":[{"s":"She eat apples.","ok":false,"c":"She eats apples.","e":"she → +s"}]}
+  </div>
+
+  <textarea id="exjson" style="width:100%;background:#050A14;border:3px solid var(--stone-dk);color:var(--text);font-family:monospace;font-size:.45rem;padding:.7rem;height:140px;outline:none;resize:vertical" placeholder="Collez ici le JSON généré par l'IA (Claude)..."></textarea>
+
+  <div style="margin-top:.8rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center">
+    <select id="ex-theme" style="background:#050A14;border:2px solid var(--stone-dk);color:var(--text);font-family:'Press Start 2P',monospace;font-size:.38rem;padding:.5rem;flex:1;min-width:160px">
+      ${THEMES.map((t,i)=>`<option value="${i}">${t.icon} ${t.name} – ${t.sub}</option>`).join('')}
+    </select>
+    <select id="ex-level" style="background:#050A14;border:2px solid var(--stone-dk);color:var(--text);font-family:'Press Start 2P',monospace;font-size:.38rem;padding:.5rem">
+      <option value="1">Niveau 1 – QCM</option>
+      <option value="2">Niveau 2 – Phrases à trous</option>
+      <option value="3">Niveau 3 – Ordre</option>
+      <option value="4">Niveau 4 – Erreur</option>
+    </select>
+  </div>
+
+  <div style="margin-top:.8rem;display:flex;gap:.7rem;flex-wrap:wrap">
+    <button class="mc-btn diamond" onclick="previewExercise()">👁️ Prévisualiser</button>
+    <button class="mc-btn green" onclick="addAndExport()">⬇️ Intégrer &amp; Télécharger le nouveau index.html</button>
+  </div>
+  <div id="ex-preview" style="margin-top:.8rem"></div>
+  <div id="ex-msg"></div>
+</div>
+
+<div style="margin-top:1rem"><button class="mc-btn grey" onclick="navigate('home')">🏠 Retour accueil</button></div>`;
+},
+
+// ─── STUDENT LOGIN ────────────────────────────────────────────
+student_login:()=>`
+<div class="nav-back" onclick="navigate('home')">← Retour</div>
+<div class="login-wrap mc-box" style="padding:1.5rem">
+  <h2>🧑‍🎓 Espace Élève</h2>
+  <div class="sep"></div>
+  <div class="form-group">
+    <label>Code d'accès (donné par le prof)</label>
+    <input type="text" id="scode" placeholder="ex: 1234" maxlength="8" onkeydown="if(event.key==='Enter')studentLogin()">
+  </div>
+  <div id="smsg"></div>
+  <div class="sep"></div>
+  <button class="mc-btn green" onclick="studentLogin()" style="width:100%">🔓 Entrer dans l'arène !</button>
+</div>`,
+
+// ─── STUDENT IDENTIFY ─────────────────────────────────────────
+student_identify:()=>`
+<div class="nav-back" onclick="navigate('student_login')">← Retour</div>
+<div class="login-wrap mc-box" style="padding:1.5rem">
+  <h2>👤 Qui es-tu, aventurier ?</h2>
+  <div class="sep"></div>
+  <div class="form-row">
+    <div class="form-group">
+      <label>2 premières lettres du prénom</label>
+      <input type="text" id="fn" placeholder="ex: JO" maxlength="2" style="text-transform:uppercase">
+      <div class="hint">Ex : Julien → JU</div>
+    </div>
+    <div class="form-group">
+      <label>2 premières lettres du nom</label>
+      <input type="text" id="ln" placeholder="ex: SM" maxlength="2" style="text-transform:uppercase">
+      <div class="hint">Ex : Smith → SM</div>
+    </div>
+  </div>
+  <div class="form-group">
+    <label>Classe</label>
+    <input type="text" id="cls" placeholder="ex: MRC, AEPA, SN..." maxlength="10" style="text-transform:uppercase">
+  </div>
+  <div id="imsg"></div>
+  <div class="sep"></div>
+  <button class="mc-btn green" onclick="identifyStudent()" style="width:100%">⚔️ Commencer l'aventure !</button>
+</div>`,
+
+// ─── THEME SELECTION ──────────────────────────────────────────
+themes:()=>{
+  const sid=S.student.id;
+  return`
+<div class="student-bar"><span>👤 <span class="sname">${S.student.fn}${S.student.ln}</span></span><span class="sclass">🏫 ${S.student.cls}</span><button class="mc-btn grey" onclick="navigate('bilan')" style="font-size:.37rem;padding:.35rem .7rem">📊 Mon bilan</button></div>
+<div class="page-header"><h1>⚔️ Choisis ton thème</h1><p>Complète tous les niveaux de chaque thème !</p></div>
+<div class="themes-grid">
+${THEMES.map((t,i)=>{
+  const prog=Math.round(themeProgress(sid,t)*100);
+  const dots=t.levels.map(l=>{
+    if(isLevelDone(sid,t,l.n))return'<div class="ld done" title="Niveau '+l.n+' complété"></div>';
+    if(isLevelUnlocked(sid,t,l.n))return'<div class="ld unlocked" title="Niveau '+l.n+' disponible"></div>';
+    return'<div class="ld locked" title="Niveau '+l.n+' verrouillé"></div>';
+  }).join('');
+  return`<div class="theme-card" onclick="navigate('levels',{theme:THEMES[${i}]})" style="border-top:4px solid ${t.color}">
+    <div class="tc-icon">${t.icon}</div>
+    <h3>${t.name}</h3>
+    <div class="tc-sub">${t.sub}</div>
+    <div class="tc-lex">${t.lex}</div>
+    <div class="level-dots">${dots}</div>
+    <div class="tc-progress"><div class="tc-progress-fill" style="width:${prog}%"></div></div>
+    <div style="font-size:.38rem;color:var(--text-dim);margin-top:.4rem">${prog}% complété</div>
+  </div>`;
+}).join('')}
+</div>`;
+},
+
+// ─── LEVEL SELECTION ──────────────────────────────────────────
+levels:()=>{
+  const t=S.theme;const sid=S.student.id;
+  const levelBadges=['stone','iron','gold','diamond'];
+  return`
+<div class="nav-back" onclick="navigate('themes')">← Thèmes</div>
+<div class="student-bar"><span>👤 <span class="sname">${S.student.fn}${S.student.ln}</span></span><span class="sclass">🏫 ${S.student.cls}</span></div>
+<div class="page-header"><h1>${t.icon} ${t.name}</h1><p>${t.sub} · ${t.lex}</p></div>
+<div class="levels-list">
+${t.levels.map(l=>{
+  const done=isLevelDone(sid,t,l.n);
+  const unlocked=isLevelUnlocked(sid,t,l.n);
+  const lockIcon=!unlocked?'🔒':done?'✅':'▶️';
+  let scoreStr='';
+  if(done&&S.progress[sid]&&S.progress[sid][t.id]&&S.progress[sid][t.id][l.n]){
+    const exData=S.progress[sid][t.id][l.n];
+    let total=0,scored=0;
+    Object.values(exData).forEach(d=>{scored+=d.score;total+=d.total;});
+    scoreStr=`<div class="lv-score">🏆 Score : ${scored}/${total}</div>`;
+  }
+  return`<div class="level-card ${done?'done':''} ${!unlocked?'locked':''}" onclick="${unlocked?`navigate('ex_select',{level:THEMES.find(x=>x.id==='${t.id}').levels[${l.n-1}]})`:''}" >
+    <div class="lv-badge ${levelBadges[l.n-1]}">${l.badge}</div>
+    <div class="lv-info">
+      <h3>Niveau ${l.n} – ${l.label}</h3>
+      <div class="lv-type">📝 ${l.desc}</div>
+      ${scoreStr}
+      ${!unlocked?'<div style="font-size:.38rem;color:var(--red);margin-top:.3rem">🔒 Terminer le niveau précédent d\'abord</div>':''}
+    </div>
+    <div class="lv-lock">${lockIcon}</div>
+  </div>`;
+}).join('')}
+</div>
+<button class="mc-btn grey" onclick="navigate('themes')" style="margin-top:1rem">← Retour aux thèmes</button>`;
+},
+
+// ─── EXERCISE SELECT (multiple exercises per level) ───────────
+ex_select:()=>{
+  const t=S.theme;const lvl=S.level;const sid=S.student.id;
+  if(lvl.exs.length===1){
+    S.exercise=lvl.exs[0];S.qIdx=0;S.answers=[];S.locked=false;
+    return pages.exercise();
+  }
+  return`
+<div class="nav-back" onclick="navigate('levels',{theme:S.theme})">← Niveaux</div>
+<div class="page-header"><h1>${t.icon} Niveau ${lvl.n} – Exercices</h1><p>${lvl.label} · ${t.sub}</p></div>
+<div class="ex-select-list">
+${lvl.exs.map((ex,i)=>{
+  const pr=getExProgress(sid,t.id,lvl.n,ex.id);
+  const tag=pr?`<span class="ex-done-tag">✅ ${pr.score}/${pr.total} pts</span>`:`<span style="color:var(--text-dim);font-size:.4rem">Non commencé</span>`;
+  return`<div class="ex-select-card" onclick="startExercise(${i})">
+    <h3>${ex.title}</h3>
+    ${tag}
+  </div>`;
+}).join('')}
+</div>`;
+},
+
+// ─── EXERCISE ─────────────────────────────────────────────────
+exercise:()=>{
+  const ex=S.exercise;const lvl=S.level;
+  const q=ex.qs[S.qIdx];const total=ex.qs.length;
+  const pct=Math.round((S.qIdx/total)*100);
+
+  let qContent='';
+  if(lvl.type==='qcm'){
+    const letters=['A','B','C','D'];
+    qContent=`<div class="q-text">${q.q.replace('___','<span class="q-blank">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>')}</div>
+    <div class="qcm-opts" id="opts">
+    ${q.opts.map((o,i)=>`<div class="qcm-opt" id="opt${i}" onclick="answerQCM(${i})"><span class="opt-letter">${letters[i]}</span>${o}</div>`).join('')}
+    </div>
+    <div id="fb"></div>`;
+  }
+  else if(lvl.type==='blank'){
+    const sentenceDisplay=q.b?(q.b+' <strong style="color:var(--diamond)">('+q.h+')</strong> _____ '+q.a):('<strong style="color:var(--diamond)">('+q.h+')</strong> _____ '+q.a);
+    qContent=`<div class="q-text">${sentenceDisplay}</div>
+    <div class="blank-hint">💡 Verbe à conjuguer : ${q.h}</div>
+    <input class="blank-input" id="blankinput" placeholder="Tape ta réponse..." autocomplete="off" autocorrect="off" spellcheck="false" onkeydown="if(event.key==='Enter'&&!S.locked)answerBlank()">
+    <div id="fb" style="margin-top:.7rem"></div>
+    <div id="blank-btn" style="margin-top:.7rem">
+      <button class="mc-btn green" onclick="answerBlank()">✅ Vérifier</button>
+    </div>`;
+  }
+  else if(lvl.type==='order'){
+    const words=S.wordBank&&S.wordBank.length>=0?S.wordBank:scramble(q.s,S.qIdx);
+    if(!S.wordBank||S.wordBank.length+S.wordOrder.length===0){
+      S.wordBank=scramble(q.s,S.qIdx*7+3);S.wordOrder=[];
+    }
+    qContent=`<div class="order-instruction">📌 Remets les mots dans le bon ordre pour former la phrase correcte.</div>
+    <div class="word-bank-label">🃏 Mots disponibles :</div>
+    <div class="word-bank" id="wbank">
+    ${S.wordBank.map((w,i)=>`<div class="wchip" onclick="orderPickBank(${i})">${w}</div>`).join('')}
+    </div>
+    <div class="word-ans-label">📝 Ta phrase :</div>
+    <div class="word-ans" id="wans">
+    ${S.wordOrder.map((w,i)=>`<div class="wchip in-ans" onclick="orderPickAns(${i})">${w}</div>`).join('')}
+    </div>
+    <div id="fb"></div>
+    <div id="order-btn" style="margin-top:.7rem;display:flex;gap:.7rem;flex-wrap:wrap">
+      <button class="mc-btn green" onclick="answerOrder()">✅ Vérifier</button>
+      <button class="mc-btn grey" onclick="resetOrder()">🔄 Réinitialiser</button>
+    </div>`;
+  }
+  else if(lvl.type==='error'){
+    qContent=`<div class="err-sentence">${q.s}</div>
+    <div class="err-btns" id="errbtn">
+      <button class="mc-btn green" onclick="answerError(true)">✅ CORRECT</button>
+      <button class="mc-btn red" onclick="answerError(false)">❌ INCORRECT</button>
+    </div>
+    <div id="fb"></div>`;
+  }
+
+  return`
+<div class="nav-back" onclick="confirmLeave()">← Quitter l'exercice</div>
+<div class="student-bar"><span>👤 <span class="sname">${S.student.fn}${S.student.ln}</span></span><span class="sclass">🏫 ${S.student.cls}</span></div>
+<div class="ex-header">
+  <div class="ex-title">${S.theme.icon} ${ex.title}</div>
+  <div class="ex-counter">❓ ${S.qIdx+1} / ${total}</div>
+</div>
+<div class="xp-wrap">
+  <div class="xp-label"><span>Progression</span><span>${pct}%</span></div>
+  <div class="xp-bar"><div class="xp-fill" style="width:${pct}%"></div></div>
+</div>
+<div class="question-box">
+  ${qContent}
+</div>
+<div id="next-btn"></div>`;
+},
+
+// ─── SCORE SCREEN ─────────────────────────────────────────────
+score_screen:()=>{
+  const ex=S.exercise;
+  const score=S.answers.filter(a=>a.ok).length;
+  const total=S.answers.length;
+  const stars=getStars(score,total);
+  const msg=getScoreMsg(score,total);
+  const nextLevelDone=S.level&&isLevelDone(S.student.id,S.theme,S.level.n+1);
+  const nextLevelUnlocked=S.level&&S.level.n<4&&isLevelUnlocked(S.student.id,S.theme,S.level.n+1);
+  return`
+<div class="score-screen mc-box" style="padding:2rem">
+  <div style="font-size:.5rem;color:var(--text-dim);margin-bottom:.5rem">${S.theme.icon} ${ex.title}</div>
+  <div class="score-stars">${stars}</div>
+  <div class="score-big">${score} / ${total}</div>
+  <div class="score-label">points récoltés</div>
+  <div class="score-msg">${msg}</div>
+  <div class="score-grid">
+    <div class="score-stat"><span class="sv">${score}</span><span class="sl">✅ Bonnes réponses</span></div>
+    <div class="score-stat"><span class="sv">${total-score}</span><span class="sl">❌ Erreurs</span></div>
+    <div class="score-stat"><span class="sv">${Math.round(score/total*100)}%</span><span class="sl">📊 Réussite</span></div>
+    <div class="score-stat"><span class="sv">${stars}</span><span class="sl">⭐ Étoiles</span></div>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:.7rem;justify-content:center;margin-top:1.5rem">
+    <button class="mc-btn diamond" onclick="navigate('corrections')">📋 Voir la correction</button>
+    ${nextLevelUnlocked&&!nextLevelDone?`<button class="mc-btn gold" onclick="navigate('levels',{theme:S.theme})">⬆️ Niveau ${S.level.n+1} !</button>`:''}
+    <button class="mc-btn green" onclick="navigate('themes')">🗺️ Choisir un thème</button>
+    <button class="mc-btn grey" onclick="navigate('bilan')">📊 Mon bilan</button>
+  </div>
+  ${nextLevelUnlocked&&!nextLevelDone?'<div class="enc" style="margin-top:1rem">🔓 Niveau '+(S.level.n+1)+' débloqué ! Continue !</div>':''}
+</div>`;
+},
+
+// ─── CORRECTIONS ──────────────────────────────────────────────
+corrections:()=>{
+  const ex=S.exercise;const lvl=S.level;
+  const score=S.answers.filter(a=>a.ok).length;
+  let items=S.answers.map((a,i)=>{
+    const q=ex.qs[i];
+    let qText='',userText='',corrText='',expl='';
+    if(lvl.type==='qcm'){
+      qText=q.q;userText='Réponse : '+q.opts[a.user];corrText='Bonne réponse : '+q.opts[q.c];expl=q.e;
+    }else if(lvl.type==='blank'){
+      qText=(q.b?q.b+' ':'')+' ('+q.h+') _____ '+q.a;
+      userText='Réponse : '+a.user;corrText='Bonne réponse : '+q.ans;expl=q.e;
+    }else if(lvl.type==='order'){
+      qText='Remettre en ordre…';userText='Réponse : '+a.user;corrText='Bonne réponse : '+q.s;expl=q.e;
+    }else if(lvl.type==='error'){
+      qText=q.s;userText='Réponse : '+(a.user?'CORRECT':'INCORRECT');
+      corrText=q.ok?'→ Cette phrase est CORRECTE':'→ INCORRECTE. Correction : '+q.c;expl=q.e;
+    }
+    return`<div class="corr-item ${a.ok?'ci-ok':'ci-ko'}">
+      <div class="ci-q">❓ ${qText}</div>
+      <div class="ci-your ${a.ok?'ok':'ko'}">${a.ok?'✅':'❌'} ${userText}</div>
+      ${!a.ok?`<div class="ci-ans">💡 ${corrText}</div>`:''}
+      <div class="ci-expl">📖 ${expl}</div>
+    </div>`;
+  }).join('');
+  return`
+<div class="nav-back" onclick="navigate('score_screen')">← Score</div>
+<div class="page-header"><h1>📋 Correction complète</h1><p>${ex.title} · ${score}/${ex.qs.length} points</p></div>
+<div class="corr-list">${items}</div>
+<div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem">
+  <button class="mc-btn green" onclick="navigate('themes')">🗺️ Choisir un thème</button>
+  <button class="mc-btn diamond" onclick="navigate('bilan')">📊 Mon bilan</button>
+</div>`;
+},
+
+// ─── BILAN ────────────────────────────────────────────────────
+bilan:()=>{
+  const sid=S.student.id;
+  let totalScore=0,totalPossible=0,exDone=0;
+  THEMES.forEach(t=>{
+    if(S.progress[sid]&&S.progress[sid][t.id]){
+      Object.values(S.progress[sid][t.id]).forEach(lvData=>{
+        Object.values(lvData).forEach(d=>{totalScore+=d.score;totalPossible+=d.total;exDone++;});
+      });
+    }
+  });
+  let sections=THEMES.map(t=>{
+    const thProg=S.progress[sid]&&S.progress[sid][t.id];
+    if(!thProg)return`<div class="bilan-section"><h3>${t.icon} ${t.name} – ${t.sub}</h3><div style="font-size:.4rem;color:var(--text-dim)">Aucun exercice fait pour ce thème.</div></div>`;
+    let content='';
+    t.levels.forEach(l=>{
+      const lvData=thProg[l.n];
+      if(!lvData)return;
+      Object.entries(lvData).forEach(([eid,d])=>{
+        content+=`<div class="bilan-score-line">✅ Niveau ${l.n} – ${l.label} : <strong>${d.score}/${d.total} pts</strong></div>`;
+        d.answers.forEach((a,i)=>{
+          const q=l.exs.find(ex=>ex.id===eid)?.qs[i];
+          if(!q)return;
+          let qT='',uT='',cT='';
+          if(l.type==='qcm'){qT=q.q;uT=q.opts[a.user]||a.user;cT=q.opts[q.c];}
+          else if(l.type==='blank'){qT=(q.b||'')+' ('+q.h+') ___ '+q.a;uT=a.user;cT=q.ans;}
+          else if(l.type==='order'){qT='Remettre en ordre';uT=a.user;cT=q.s;}
+          else if(l.type==='error'){qT=q.s;uT=a.user?'CORRECT':'INCORRECT';cT=q.ok?'CORRECT':(q.c||'INCORRECT');}
+          content+=`<div class="bilan-q">
+            <div class="bq-q">❓ ${qT}</div>
+            <div class="${a.ok?'bq-user-ok':'bq-user-ko'}">${a.ok?'✅':'❌'} ${uT}</div>
+            ${!a.ok?`<div class="bq-corr">💡 Correction : ${cT}</div>`:''}
+            <div class="bq-expl">📖 ${q.e||''}</div>
+          </div>`;
+        });
+      });
+    });
+    if(!content)content='<div style="font-size:.4rem;color:var(--text-dim)">Aucun exercice terminé.</div>';
+    return`<div class="bilan-section"><h3>${t.icon} ${t.name} – ${t.sub}</h3>${content}</div>`;
+  }).join('');
+  return`
+<div class="nav-back" onclick="navigate('themes')">← Thèmes</div>
+<div class="student-bar"><span>👤 <span class="sname">${S.student.fn}${S.student.ln}</span></span><span class="sclass">🏫 ${S.student.cls}</span></div>
+<div class="page-header"><h1>📊 Mon Bilan</h1><p>Récapitulatif complet de ta progression</p></div>
+<div class="mc-box" style="padding:1.2rem;margin-bottom:1.2rem;display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;text-align:center">
+  <div><div style="font-size:1.2rem;color:var(--gold)">${totalScore}</div><div style="font-size:.38rem;color:var(--text-dim)">Points totaux</div></div>
+  <div><div style="font-size:1.2rem;color:var(--diamond)">${exDone}</div><div style="font-size:.38rem;color:var(--text-dim)">Exercices faits</div></div>
+  <div><div style="font-size:1.2rem;color:var(--green)">${totalPossible>0?Math.round(totalScore/totalPossible*100):0}%</div><div style="font-size:.38rem;color:var(--text-dim)">Réussite globale</div></div>
+</div>
+${sections}
+<div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-top:1rem">
+  <button class="mc-btn diamond" onclick="generatePDF()">📄 Télécharger le bilan PDF</button>
+  <button class="mc-btn green" onclick="navigate('themes')">🗺️ Retour aux thèmes</button>
+</div>`;
+},
+
+// ─── RGPD ──────────────────────────────────────────────────────
+rgpd:()=>`
+<div class="nav-back" onclick="navigate('home')">← Retour</div>
+<div class="page-header"><h1>📜 Mentions RGPD</h1></div>
+<div class="rgpd-content">
+  <h2>Collecte des données</h2>
+  <p>Cette application collecte et stocke localement (sur votre appareil) des données d'identification anonymisées : initiales du prénom et du nom, nom de classe, et résultats aux exercices. Aucune donnée n'est transmise à des serveurs externes.</p>
+  <h2>Données stockées</h2>
+  <p>Les données sont enregistrées dans le stockage local (localStorage) de votre navigateur. Elles restent sur votre appareil et ne sont pas partagées.</p>
+  <h2>Durée de conservation</h2>
+  <p>Les données sont conservées jusqu'à effacement manuel ou réinitialisation par l'enseignant.</p>
+  <h2>Droits</h2>
+  <p>Conformément au Règlement Général sur la Protection des Données (RGPD – Règlement EU 2016/679), vous disposez d'un droit d'accès, de rectification et d'effacement de vos données. Pour exercer ces droits, contactez l'enseignant responsable de l'application.</p>
+  <h2>Contact</h2>
+  <p>Cette page sera complétée avec les informations de contact de l'établissement. — Application GRAMY, créée par C. Iemfre.</p>
+</div>
+<div style="margin-top:1rem"><button class="mc-btn grey" onclick="navigate('home')">← Retour</button></div>`
+};
+
+// ═══════════════════════════════════════════════════════════════
+//  ACTIONS
+// ═══════════════════════════════════════════════════════════════
+
+function teacherLogin(){
+  const code=document.getElementById('tcode').value;
+  if(code==='0504'){navigate('teacher_dash');}
+  else{document.getElementById('tmsg').innerHTML='<div class="msg-err">❌ Code incorrect</div>';}
+}
+
+function changeStudentCode(){
+  const c=document.getElementById('newcode').value.trim();
+  if(c.length<2){document.getElementById('code-msg').innerHTML='<div class="msg-err">Code trop court (min 2 caractères)</div>';return;}
+  setStudentCode(c);document.getElementById('code-msg').innerHTML='<div class="msg-ok">✅ Code mis à jour : '+c+'</div>';
+}
+
+function resetAll(){
+  S.progress={};saveProgress();localStorage.removeItem('gramy_students');toast('🗑️ Toutes les données effacées');navigate('teacher_dash');}
+
+// ─── Parse & validate exercise JSON ───────────────────────────
+function parseExJSON(){
+  const json=document.getElementById('exjson').value.trim();
+  if(!json)throw new Error('Le champ JSON est vide.');
+  const ex=JSON.parse(json);
+  if(!ex.id||!ex.title||!Array.isArray(ex.qs)||ex.qs.length===0)
+    throw new Error('Format invalide : id, title et qs (tableau non vide) sont requis.');
+  return ex;
+}
+
+// ─── Preview exercise before export ───────────────────────────
+function previewExercise(){
+  const preview=document.getElementById('ex-preview');
+  const msg=document.getElementById('ex-msg');
+  try{
+    const ex=parseExJSON();
+    const ti=parseInt(document.getElementById('ex-theme').value);
+    const li=parseInt(document.getElementById('ex-level').value)-1;
+    const t=THEMES[ti];const l=t.levels[li];
+    let rows=ex.qs.slice(0,3).map((q,i)=>{
+      let txt='';
+      if(q.q)txt=q.q;
+      else if(q.b!==undefined)txt=(q.b?q.b+' ':'')+' ('+q.h+') ___ '+q.a;
+      else if(q.s)txt=q.s+(q.ok!==undefined?' ['+(q.ok?'✓':'✗')+']':'');
+      return`<div style="font-size:.42rem;color:var(--text-dim);padding:.4rem 0;border-bottom:1px solid #222">${i+1}. ${txt}</div>`;
+    }).join('');
+    if(ex.qs.length>3)rows+=`<div style="font-size:.38rem;color:var(--text-dim);padding:.3rem 0">...et ${ex.qs.length-3} question(s) de plus</div>`;
+    preview.innerHTML=`
+      <div style="background:#041408;border:2px solid var(--green);padding:.8rem;margin-top:.5rem">
+        <div style="font-size:.5rem;color:var(--green);margin-bottom:.5rem">✅ Prévisualisation : ${ex.title}</div>
+        <div style="font-size:.4rem;color:var(--text-dim);margin-bottom:.5rem">Cible : ${t.icon} ${t.name} – ${t.sub} · Niveau ${l.n} · ${ex.qs.length} question(s)</div>
+        ${rows}
+        <div style="font-size:.4rem;color:var(--gold);margin-top:.5rem">👆 Si c'est correct, cliquez sur "Intégrer & Télécharger"</div>
+      </div>`;
+    msg.innerHTML='';
+  }catch(e){
+    preview.innerHTML='';
+    msg.innerHTML='<div class="msg-err">❌ Erreur : '+e.message+'</div>';
+  }
+}
+
+// ─── Add exercise and export full new index.html ───────────────
+function addAndExport(){
+  const msg=document.getElementById('ex-msg');
+  try{
+    const ex=parseExJSON();
+    const ti=parseInt(document.getElementById('ex-theme').value);
+    const li=parseInt(document.getElementById('ex-level').value)-1;
+
+    // Check for duplicate id
+    const existing=THEMES[ti].levels[li].exs.find(e=>e.id===ex.id);
+    if(existing)throw new Error('Un exercice avec l\'id "'+ex.id+'" existe déjà dans ce niveau. Choisissez un id unique.');
+
+    // Add to runtime THEMES (so serialization includes it)
+    THEMES[ti].levels[li].exs.push(ex);
+
+    // Serialize updated THEMES to JSON
+    const themesJSON=JSON.stringify(THEMES,null,0);
+
+    // Grab the full current page source
+    const fullHTML=document.documentElement.outerHTML;
+
+    // Replace the THEMES= definition in the source
+    // We find the marker comment and replace until the closing ];
+    const marker='const THEMES=';
+    const startIdx=fullHTML.indexOf(marker);
+    if(startIdx===-1)throw new Error('Marqueur THEMES introuvable dans le source.');
+
+    // Find the matching ]; that closes THEMES — walk bracket depth
+    let depth=0,i=startIdx+marker.length,found=-1;
+    while(i<fullHTML.length){
+      if(fullHTML[i]==='[')depth++;
+      else if(fullHTML[i]===']'){depth--;if(depth===0){found=i;break;}}
+      i++;
+    }
+    if(found===-1)throw new Error('Structure THEMES non trouvée.');
+
+    const newHTML=fullHTML.slice(0,startIdx)+marker+themesJSON+fullHTML.slice(found+1);
+
+    // Download as index.html
+    const blob=new Blob([newHTML],{type:'text/html;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download='index.html';
+    document.body.appendChild(a);a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+
+    msg.innerHTML=`<div class="msg-ok" style="line-height:2.2">
+      ✅ <strong>${ex.title}</strong> intégré avec succès !<br>
+      📥 Le nouveau <strong>index.html</strong> a été téléchargé.<br>
+      🚀 Déposez-le sur GitHub → Vercel le redéploie → les élèves voient les nouveaux exercices !
+    </div>`;
+    document.getElementById('ex-preview').innerHTML='';
+    document.getElementById('exjson').value='';
+
+  }catch(e){
+    // If we added the exercise before the error, remove it
+    msg.innerHTML='<div class="msg-err">❌ Erreur : '+e.message+'</div>';
+  }
+}
+
+function studentLogin(){
+  const code=document.getElementById('scode').value.trim();
+  const expected=getStudentCode();
+  if(code===expected){navigate('student_identify');}
+  else{document.getElementById('smsg').innerHTML='<div class="msg-err">❌ Code incorrect. Demande le code à ton professeur.</div>';}
+}
+
+function identifyStudent(){
+  let fn=(document.getElementById('fn').value||'').toUpperCase().trim();
+  let ln=(document.getElementById('ln').value||'').toUpperCase().trim();
+  let cls=(document.getElementById('cls').value||'').toUpperCase().trim();
+  if(fn.length<1||ln.length<1||cls.length<1){document.getElementById('imsg').innerHTML='<div class="msg-err">❌ Remplis tous les champs</div>';return;}
+  if(fn.length>2)fn=fn.slice(0,2);if(ln.length>2)ln=ln.slice(0,2);
+  const id=fn+'_'+ln+'_'+cls;
+  S.student={id,fn,ln,cls};
+  // Save student
+  const stus=getStudents();stus[id]={fn,ln,cls,lastSeen:new Date().toLocaleDateString('fr-FR')};saveStudents(stus);
+  // Load their progress
+  if(!S.progress[id])S.progress[id]={};
+  toast('🎮 Bienvenue, '+fn+' '+ln+' !');
+  navigate('themes');
+}
+
+function startExercise(exIdx){
+  S.exercise=S.level.exs[exIdx];S.qIdx=0;S.answers=[];S.locked=false;
+  S.wordBank=[];S.wordOrder=[];
+  if(S.level.type==='order'){
+    const q=S.exercise.qs[0];
+    S.wordBank=scramble(q.s,0*7+3);S.wordOrder=[];
+  }
+  navigate('exercise');
+}
+
+function confirmLeave(){if(confirm('Quitter cet exercice ? Ta progression sera perdue.'))navigate('themes');}
+
+// ─── QCM answer ────────────────────────────────────────────────
+function answerQCM(idx){
+  if(S.locked)return;S.locked=true;
+  const q=S.exercise.qs[S.qIdx];
+  const ok=(idx===q.c);
+  S.answers.push({q:S.qIdx,user:idx,ok});
+  // Visual feedback
+  document.querySelectorAll('.qcm-opt').forEach(el=>el.classList.add('locked'));
+  document.getElementById('opt'+idx).classList.add(ok?'ok':'ko');
+  if(!ok)document.getElementById('opt'+q.c).classList.add('ok');
+  document.getElementById('fb').innerHTML=ok?
+    `<div class="feedback-ok"><div class="fb-icon">✅</div><div class="fb-msg">${randomEnc()}</div><div class="fb-expl">${q.e}</div></div>`:
+    `<div class="feedback-ko"><div class="fb-icon">❌</div><div class="fb-msg">Pas tout à fait…</div><div class="fb-corr">💡 Bonne réponse : ${q.opts[q.c]}</div><div class="fb-expl">${q.e}</div></div>`;
+  if(ok)burst('✅');
+  showNextBtn();
+}
+
+// ─── BLANK answer ──────────────────────────────────────────────
+function answerBlank(){
+  if(S.locked)return;S.locked=true;
+  const q=S.exercise.qs[S.qIdx];
+  const inp=document.getElementById('blankinput');
+  const val=inp.value.trim().toLowerCase();
+  const ok=val===q.ans.toLowerCase();
+  S.answers.push({q:S.qIdx,user:inp.value.trim(),ok});
+  inp.classList.add(ok?'ok':'ko');inp.disabled=true;
+  document.getElementById('blank-btn').innerHTML='';
+  document.getElementById('fb').innerHTML=ok?
+    `<div class="feedback-ok"><div class="fb-icon">✅</div><div class="fb-msg">${randomEnc()}</div><div class="fb-expl">${q.e}</div></div>`:
+    `<div class="feedback-ko"><div class="fb-icon">❌</div><div class="fb-msg">Pas tout à fait…</div><div class="fb-corr">💡 Bonne réponse : <strong>${q.ans}</strong></div><div class="fb-expl">${q.e}</div></div>`;
+  if(ok)burst('✅');
+  showNextBtn();
+}
+
+// ─── ORDER chip actions ─────────────────────────────────────────
+function orderPickBank(i){
+  S.wordOrder.push(S.wordBank[i]);S.wordBank.splice(i,1);
+  rerenderOrder();
+}
+function orderPickAns(i){
+  S.wordBank.push(S.wordOrder[i]);S.wordOrder.splice(i,1);
+  rerenderOrder();
+}
+function rerenderOrder(){
+  document.getElementById('wbank').innerHTML=S.wordBank.map((w,i)=>`<div class="wchip" onclick="orderPickBank(${i})">${w}</div>`).join('');
+  document.getElementById('wans').innerHTML=S.wordOrder.map((w,i)=>`<div class="wchip in-ans" onclick="orderPickAns(${i})">${w}</div>`).join('');
+}
+function resetOrder(){
+  const q=S.exercise.qs[S.qIdx];
+  S.wordBank=scramble(q.s,S.qIdx*7+3);S.wordOrder=[];rerenderOrder();
+}
+function answerOrder(){
+  if(S.locked)return;
+  const q=S.exercise.qs[S.qIdx];
+  if(S.wordOrder.length===0){toast('❗ Place des mots dans ta phrase !');return;}
+  S.locked=true;
+  const userSentence=S.wordOrder.join(' ');
+  // normalize for comparison (strip punctuation, lowercase)
+  const norm=s=>s.replace(/[?.!]/g,'').toLowerCase().trim();
+  const ok=norm(userSentence)===norm(q.s);
+  S.answers.push({q:S.qIdx,user:userSentence,ok});
+  document.getElementById('order-btn').innerHTML='';
+  document.getElementById('fb').innerHTML=ok?
+    `<div class="feedback-ok"><div class="fb-icon">✅</div><div class="fb-msg">${randomEnc()}</div><div class="fb-expl">${q.e}</div></div>`:
+    `<div class="feedback-ko"><div class="fb-icon">❌</div><div class="fb-msg">Pas tout à fait…</div><div class="fb-corr">💡 Bonne réponse : <strong>${q.s}</strong></div><div class="fb-expl">${q.e}</div></div>`;
+  if(ok)burst('✅');
+  showNextBtn();
+}
+
+// ─── ERROR answer ──────────────────────────────────────────────
+function answerError(userSaysCorrect){
+  if(S.locked)return;S.locked=true;
+  const q=S.exercise.qs[S.qIdx];
+  const ok=(userSaysCorrect===q.ok);
+  S.answers.push({q:S.qIdx,user:userSaysCorrect,ok});
+  document.getElementById('errbtn').innerHTML='';
+  const fb=document.getElementById('fb');
+  if(ok){
+    fb.innerHTML=`<div class="feedback-ok"><div class="fb-icon">✅</div><div class="fb-msg">${randomEnc()}</div><div class="fb-expl">${q.e}</div></div>`;
+    burst('✅');
+  }else{
+    fb.innerHTML=`<div class="feedback-ko"><div class="fb-icon">❌</div><div class="fb-msg">Pas tout à fait…</div>
+    <div class="fb-corr">💡 Cette phrase est <strong>${q.ok?'CORRECTE':'INCORRECTE'}</strong>${!q.ok&&q.c?'<br>Correction : '+q.c:''}</div>
+    <div class="fb-expl">${q.e}</div></div>`;
+  }
+  showNextBtn();
+}
+
+function showNextBtn(){
+  const total=S.exercise.qs.length;
+  const isLast=(S.qIdx===total-1);
+  const nb=document.getElementById('next-btn');
+  if(nb)nb.innerHTML=isLast?
+    `<button class="mc-btn gold" onclick="finishExercise()" style="width:100%;margin-top:.5rem">🏆 Voir mon score !</button>`:
+    `<button class="mc-btn diamond" onclick="nextQuestion()" style="width:100%;margin-top:.5rem">➡️ Question suivante</button>`;
+}
+
+function nextQuestion(){
+  S.qIdx++;S.locked=false;
+  if(S.level.type==='order'){
+    const q=S.exercise.qs[S.qIdx];
+    S.wordBank=scramble(q.s,S.qIdx*7+3);S.wordOrder=[];
+  }
+  navigate('exercise');
+}
+
+function finishExercise(){
+  const score=S.answers.filter(a=>a.ok).length;
+  const total=S.answers.length;
+  const sid=S.student.id;const tid=S.theme.id;const ln=S.level.n;const eid=S.exercise.id;
+  setExProgress(sid,tid,ln,eid,{score,total,answers:S.answers.map(a=>({user:a.user,ok:a.ok}))});
+  // Check if next level unlocks
+  if(isLevelDone(sid,S.theme,ln)&&ln<4&&isLevelUnlocked(sid,S.theme,ln+1)){
+    toast('🎉 Niveau '+(ln+1)+' débloqué !',3000);
+  }
+  navigate('score_screen');
+}
+
+// ─── PDF Generation ────────────────────────────────────────────
+function generatePDF(){
+  try{
+    const {jsPDF}=window.jspdf;
+    const doc=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+    const sid=S.student.id;
+    doc.setFont('helvetica','bold');
+    doc.setFontSize(18);doc.text('GRAMY - Bilan de progression',105,20,{align:'center'});
+    doc.setFontSize(11);doc.setFont('helvetica','normal');
+    doc.text(`Eleve : ${S.student.fn} ${S.student.ln} | Classe : ${S.student.cls}`,105,30,{align:'center'});
+    doc.text(`Date : ${new Date().toLocaleDateString('fr-FR')}`,105,36,{align:'center'});
+    doc.line(15,40,195,40);
+    let y=48;
+    const addLine=(txt,bold=false,size=10,color=[0,0,0])=>{
+      if(y>270){doc.addPage();y=20;}
+      doc.setFont('helvetica',bold?'bold':'normal');
+      doc.setFontSize(size);doc.setTextColor(...color);
+      const lines=doc.splitTextToSize(txt,175);
+      lines.forEach(l=>{
+        if(y>270){doc.addPage();y=20;}
+        doc.text(l,15,y);y+=5;
+      });
+      doc.setTextColor(0,0,0);
+    };
+    let totScore=0,totPossible=0;
+    THEMES.forEach(t=>{
+      const thProg=S.progress[sid]&&S.progress[sid][t.id];
+      if(!thProg)return;
+      let themeHasData=false;
+      t.levels.forEach(l=>{
+        const lvData=thProg[l.n];
+        if(!lvData)return;
+        Object.entries(lvData).forEach(([eid,d])=>{
+          if(!themeHasData){addLine(t.name+' - '+t.sub,true,12,[40,80,40]);themeHasData=true;y+=2;}
+          totScore+=d.score;totPossible+=d.total;
+          addLine(`Niveau ${l.n} - ${l.label} : ${d.score}/${d.total} points (${Math.round(d.score/d.total*100)}%)`,true,10,[0,80,160]);
+          const ex=l.exs.find(e=>e.id===eid);
+          if(ex&&d.answers){
+            d.answers.forEach((a,i)=>{
+              const q=ex.qs[i];if(!q)return;
+              let qT='',uT='',cT='';
+              if(l.type==='qcm'){qT=q.q;uT=q.opts[a.user]||'—';cT=q.opts[q.c];}
+              else if(l.type==='blank'){qT=(q.b||'')+' ('+q.h+') _____ '+q.a;uT=a.user||'—';cT=q.ans;}
+              else if(l.type==='order'){qT='Remettre en ordre';uT=a.user||'—';cT=q.s;}
+              else if(l.type==='error'){qT=q.s;uT=a.user===true?'CORRECT':'INCORRECT';cT=q.ok?'CORRECT':(q.c?'INCORRECT -> '+q.c:'INCORRECT');}
+              addLine((a.ok?'[OK] ':'[ERR]')+' Q: '+qT,false,9,a.ok?[0,120,0]:[180,0,0]);
+              addLine('     Reponse : '+uT,false,9);
+              if(!a.ok)addLine('     Correction : '+cT,false,9,[0,80,160]);
+              addLine('     Explication : '+(q.e||''),false,8,[100,100,100]);
+              y+=1;
+            });
+          }
+          y+=3;
+        });
+      });
+    });
+    if(totPossible>0){
+      doc.line(15,y,195,y);y+=6;
+      addLine(`Score global : ${totScore} / ${totPossible} points (${Math.round(totScore/totPossible*100)}%)`,true,12,[40,40,150]);
+    }
+    doc.save(`GRAMY_${S.student.fn}${S.student.ln}_${S.student.cls}_${new Date().toLocaleDateString('fr-FR').replace(/\//g,'-')}.pdf`);
+    toast('📄 Bilan PDF téléchargé !');
+  }catch(e){toast('❌ Erreur PDF : '+e.message);}
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+loadProgress();
+render();
+</script>
+</body>
+</html>
