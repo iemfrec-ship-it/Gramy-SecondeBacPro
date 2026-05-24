@@ -216,10 +216,6 @@ input::placeholder{color:var(--text-faint)}
 /* TEACHER */
 .t-sec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.25rem}
 .t-sec-h{font-family:var(--font-h);font-size:.68rem;font-weight:500;color:var(--text);margin-bottom:1rem;letter-spacing:.07em;padding-bottom:.6rem;border-bottom:1px solid var(--border)}
-.stu-table{width:100%;border-collapse:collapse;font-size:13px}
-.stu-table th{background:var(--bg3);color:var(--text-dim);padding:.6rem .75rem;text-align:left;font-weight:500;font-size:11px;text-transform:uppercase;letter-spacing:.07em}
-.stu-table td{padding:.6rem .75rem;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.7}
-.stu-table tr:hover td{background:rgba(255,255,255,.015)}
 .theme-tag{display:inline-block;background:rgba(68,136,255,.15);color:#4488FF;border-radius:4px;padding:.15rem .5rem;font-size:11px;margin:.1rem}
 .info-box{background:rgba(68,136,255,.06);border:1px solid rgba(68,136,255,.18);border-radius:var(--r-sm);padding:1rem 1.25rem;font-size:13px;color:var(--text-dim);line-height:1.9;margin-bottom:1rem}
 .info-box strong{color:var(--text);font-weight:500}
@@ -294,8 +290,6 @@ function saveProgress(){try{localStorage.setItem('gramy_progress',JSON.stringify
 function loadProgress(){try{const d=localStorage.getItem('gramy_progress');if(d)S.progress=JSON.parse(d);}catch(e){}}
 function getStudentCode(){return localStorage.getItem('gramy_student_code')||'1234';}
 function setStudentCode(c){localStorage.setItem('gramy_student_code',c);}
-function getStudents(){try{return JSON.parse(localStorage.getItem('gramy_students')||'{}');}catch(e){return {};}}
-function saveStudents(obj){localStorage.setItem('gramy_students',JSON.stringify(obj));}
 
 // progress for a student: progress[studentId][themeId][levelN][exId] = {score,total,answers}
 function getExProgress(sid,tid,ln,eid){
@@ -431,19 +425,10 @@ teacher_login:()=>`
 
 // ─── TEACHER DASHBOARD ────────────────────────────────────────
 teacher_dash:()=>{
-  const students=getStudents();const studentCode=getStudentCode();
-  const ids=Object.keys(students);
-  let rows='';
-  if(ids.length===0)rows='<tr><td colspan="4" style="text-align:center;color:var(--text-faint);padding:1.5rem">Aucun \u00e9l\u00e8ve connect\u00e9 pour l\u2019instant</td></tr>';
-  else ids.forEach(id=>{
-    const stu=students[id];const prog=S.progress[id]||{};
-    let tags='';
-    THEMES.forEach(t=>{if(prog[t.id]&&Object.keys(prog[t.id]).length>0)tags+=`<span class="theme-tag">${t.icon} Niv.${Object.keys(prog[t.id]).join(',')}</span>`;});
-    rows+=`<tr><td style="font-weight:500">${stu.fn||stu.firstName||'?'} ${stu.ln||stu.lastName||''}</td><td>${stu.cls||stu.class||'—'}</td><td style="color:var(--text-dim)">${stu.lastSeen||'—'}</td><td>${tags||'<span style="color:var(--text-faint)">—</span>'}</td></tr>`;
-  });
+  const studentCode=getStudentCode();
   return`
 <div class="back" onclick="navigate('home')">Accueil</div>
-<div class="pg-h"><h1>🧑‍🏫 Tableau de bord</h1><p>Gestion de la classe et des accès</p></div>
+<div class="pg-h"><h1>🧑‍🏫 Tableau de bord</h1><p>Gestion des accès et des exercices</p></div>
 
 <div class="t-sec">
   <div class="t-sec-h">🔑 Code d'accès élèves</div>
@@ -456,52 +441,85 @@ teacher_dash:()=>{
 </div>
 
 <div class="t-sec">
-  <div class="t-sec-h">👥 Élèves connectés (${ids.length})</div>
-  <div style="overflow-x:auto">
-    <table class="stu-table">
-      <thead><tr><th>Nom</th><th>Classe</th><th>Dernière connexion</th><th>Progression</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>
-  </div>
-  <div style="margin-top:1rem">
-    <button class="btn btn-bad btn-sm" onclick="resetAll()">Réinitialiser tout</button>
-  </div>
-</div>
+  <div class="t-sec-h">➕ Créer des exercices avec Claude</div>
 
-<div class="t-sec">
-  <div class="t-sec-h">➕ Ajouter des exercices (via IA)</div>
-  <div class="info-box">
-    <strong>Comment ça marche ?</strong><br>
-    Les exercices sont <strong>intégrés directement dans le fichier index.html</strong> que vous téléchargez.<br>
-    Remplacez-le sur GitHub → Vercel redéploie → <strong>tous les élèves voient les nouveaux exercices</strong>.<br><br>
-    1️⃣ Demandez à Claude de générer des exercices selon le format ci-dessous<br>
-    2️⃣ Collez le JSON dans le champ · 3️⃣ Prévisualisez · 4️⃣ Téléchargez le nouveau index.html<br>
-    5️⃣ Remplacez sur GitHub
+  <div class="info-box" style="margin-bottom:1.25rem">
+    <strong style="color:var(--text)">Workflow en 4 étapes :</strong><br>
+    1️⃣ Remplissez le formulaire ci-dessous &amp; cliquez <em>Générer le prompt</em><br>
+    2️⃣ Copiez le prompt et envoyez-le à Claude dans votre conversation<br>
+    3️⃣ Claude vous renvoie un JSON → copiez-le<br>
+    4️⃣ Collez-le dans la zone ci-dessous → Téléchargez index.html → remplacez sur GitHub
   </div>
-  <div class="code-box" style="margin-bottom:1rem;max-height:120px">
-    <span style="color:#4488FF">// QCM :</span> {"id":"id-unique","title":"Titre","qs":[{"q":"She ___ pizza.","opts":["eat","eats","eating","eaten"],"c":1,"e":"she → +s"}]}<br>
-    <span style="color:#A040FF">// BLANK :</span> {"id":"id-unique","title":"Titre","qs":[{"b":"My father","h":"cook","a":"pasta.","ans":"cooks","e":"he → +s"}]}<br>
-    <span style="color:#FFD700">// ORDER :</span> {"id":"id-unique","title":"Titre","qs":[{"s":"She eats cereals every morning.","e":"Sujet + Verbe + ..."}]}<br>
-    <span style="color:#00FF88">// ERROR :</span> {"id":"id-unique","title":"Titre","qs":[{"s":"She eat apples.","ok":false,"c":"She eats apples.","e":"she → +s"}]}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+    <div class="fg" style="margin:0">
+      <label class="lbl">Thème cible</label>
+      <select id="nb-theme" style="font-size:13px;padding:10px" onchange="toggleNewTheme()">
+        ${THEMES.map((t,i)=>`<option value="existing:${i}">${t.icon} ${t.name} – ${t.sub}</option>`).join('')}
+        <option value="new">✨ Nouveau thème…</option>
+      </select>
+    </div>
+    <div class="fg" style="margin:0">
+      <label class="lbl">Niveau / Type d'exercice</label>
+      <select id="nb-level" style="font-size:13px;padding:10px">
+        <option value="1:qcm">Niveau 1 – QCM (4 choix)</option>
+        <option value="2:blank">Niveau 2 – Phrases à trous</option>
+        <option value="3:order">Niveau 3 – Remettre dans l'ordre</option>
+        <option value="4:error">Niveau 4 – Trouver l'erreur</option>
+      </select>
+    </div>
   </div>
-  <textarea id="exjson" style="height:130px;font-family:monospace;font-size:.85rem;resize:vertical" placeholder="Collez ici le JSON généré par Claude..."></textarea>
-  <div style="margin-top:.8rem;display:flex;gap:.7rem;flex-wrap:wrap;align-items:center">
-    <select id="ex-theme" style="flex:1;min-width:160px;font-size:13px;padding:10px">
-      ${THEMES.map((t,i)=>`<option value="${i}">${t.icon} ${t.name} – ${t.sub}</option>`).join('')}
+
+  <div id="new-theme-fields" style="display:none;background:rgba(68,136,255,0.06);border:1px solid rgba(68,136,255,0.15);border-radius:10px;padding:1rem;margin-bottom:1rem">
+    <div style="font-size:12px;color:var(--neon);margin-bottom:.75rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em">Informations du nouveau thème</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
+      <div class="fg" style="margin:0"><label class="lbl">Nom du thème</label><input id="nt-name" placeholder="ex: Futur simple" style="font-size:14px"></div>
+      <div class="fg" style="margin:0"><label class="lbl">Sous-titre</label><input id="nt-sub" placeholder="ex: Forme affirmative" style="font-size:14px"></div>
+      <div class="fg" style="margin:0"><label class="lbl">Lexique / champ sémantique</label><input id="nt-lex" placeholder="ex: 🌍 Environnement" style="font-size:14px"></div>
+      <div class="fg" style="margin:0"><label class="lbl">Icône emoji</label><input id="nt-icon" placeholder="🌍" style="font-size:18px;text-align:center" maxlength="4"></div>
+    </div>
+    <div style="margin-top:.75rem">
+      <label class="lbl">Couleur néon</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">
+        ${['#00F5FF','#FF2090','#A040FF','#FF8C00','#FF3355','#FFD700','#00FF88','#4488FF','#FF6EC7','#39FF14'].map(col=>`<div onclick="document.getElementById('nt-color').value='${col}'" style="width:26px;height:26px;background:${col};border-radius:6px;cursor:pointer;border:2px solid rgba(255,255,255,0.15)"></div>`).join('')}
+        <input id="nt-color" placeholder="#4488FF" maxlength="7" style="width:90px;font-size:13px;padding:5px 8px;text-align:center">
+      </div>
+    </div>
+  </div>
+
+  <div class="fg">
+    <label class="lbl">Sujet et consignes pour Claude</label>
+    <textarea id="nb-desc" style="height:80px;font-size:14px;resize:vertical" placeholder="ex: Créer des questions sur le futur simple avec le vocabulaire de l'environnement (pollution, recyclage...). Public : élèves de bac pro 2nde."></textarea>
+  </div>
+
+  <div class="fg" style="margin-bottom:1rem">
+    <label class="lbl">Nombre de questions</label>
+    <select id="nb-count" style="font-size:13px;padding:10px;width:auto">
+      <option value="10">10 questions</option>
+      <option value="15" selected>15 questions</option>
+      <option value="20">20 questions</option>
     </select>
-    <select id="ex-level" style="font-size:13px;padding:10px">
-      <option value="1">Niveau 1 – QCM</option>
-      <option value="2">Niveau 2 – Phrases à trous</option>
-      <option value="3">Niveau 3 – Ordre</option>
-      <option value="4">Niveau 4 – Erreur</option>
-    </select>
   </div>
-  <div style="margin-top:.8rem;display:flex;gap:.7rem;flex-wrap:wrap">
-    <button class="btn btn-o btn-sm" onclick="previewExercise()">👁 Prévisualiser</button>
-    <button class="btn btn-ok" onclick="addAndExport()">⬇ Intégrer &amp; Télécharger index.html</button>
+
+  <button class="btn btn-p" onclick="generatePrompt()">📋 Générer le prompt pour Claude</button>
+
+  <div id="prompt-output" style="display:none;margin-top:1rem">
+    <label class="lbl">Prompt à copier — envoyez-le à Claude dans votre conversation :</label>
+    <div style="position:relative;margin-top:.4rem">
+      <textarea id="prompt-text" readonly style="height:200px;font-size:12px;font-family:monospace;background:rgba(0,0,0,0.3);color:#C8D8FF;border-color:rgba(68,136,255,0.3);resize:vertical;padding-right:100px"></textarea>
+      <button class="btn btn-o btn-sm" onclick="copyPrompt()" style="position:absolute;top:.5rem;right:.5rem">📋 Copier</button>
+    </div>
+    <div id="copy-msg" style="font-size:12px;color:#00FF88;margin-top:.3rem;min-height:16px"></div>
   </div>
-  <div id="ex-preview" style="margin-top:.8rem"></div>
-  <div id="ex-msg"></div>
+
+  <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
+    <label class="lbl">Coller le JSON renvoyé par Claude :</label>
+    <textarea id="exjson" style="height:120px;font-family:monospace;font-size:.82rem;resize:vertical;margin-top:.4rem" placeholder="Collez ici le JSON que Claude vous a fourni…"></textarea>
+    <div style="margin-top:.75rem">
+      <button class="btn btn-ok" onclick="addAndExport()">⬇ Intégrer &amp; Télécharger le nouveau index.html</button>
+    </div>
+    <div id="ex-msg" style="margin-top:.75rem"></div>
+  </div>
 </div>
 
 <div style="margin-top:1rem">
@@ -825,102 +843,177 @@ function changeStudentCode(){
   setStudentCode(c);document.getElementById('code-msg').innerHTML='<div class="msg-ok">✅ Code mis à jour : '+c+'</div>';
 }
 
-function resetAll(){
-  const overlay=document.createElement('div');
-  overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)';
-  overlay.innerHTML=`<div style="background:#0D2244;border:1px solid rgba(255,64,96,0.3);border-radius:14px;padding:2rem;max-width:340px;width:90%;text-align:center;box-shadow:0 24px 60px rgba(0,0,0,0.6)">
-    <div style="font-size:2rem;margin-bottom:1rem">🗑️</div>
-    <div style="font-family:'Orbitron',sans-serif;font-size:.75rem;color:#E8EEFF;margin-bottom:.75rem;letter-spacing:.05em">RÉINITIALISER TOUT ?</div>
-    <div style="font-size:13px;color:#8898BB;margin-bottom:1.5rem;line-height:1.7">Cette action effacera tous les progrès de tous les élèves. Irréversible.</div>
-    <div style="display:flex;gap:.75rem;justify-content:center">
-      <button onclick="S.progress={};saveProgress();localStorage.removeItem('gramy_students');document.body.removeChild(document.querySelector('.reset-overlay'));toast('🗑️ Données effacées');navigate('teacher_dash')" style="font-family:'Orbitron',sans-serif;font-size:11px;padding:10px 20px;background:rgba(255,64,96,.15);color:#FF5070;border:1px solid rgba(255,64,96,.4);border-radius:8px;cursor:pointer">Confirmer</button>
-      <button onclick="document.body.removeChild(document.querySelector('.reset-overlay'))" style="font-family:'Orbitron',sans-serif;font-size:11px;padding:10px 20px;background:rgba(68,136,255,.15);color:#4488FF;border:1px solid rgba(68,136,255,.4);border-radius:8px;cursor:pointer">Annuler</button>
-    </div>
-  </div>`;
-  overlay.className='reset-overlay';
-  document.body.appendChild(overlay);
+function toggleNewTheme(){
+  const val=document.getElementById('nb-theme').value;
+  document.getElementById('new-theme-fields').style.display=val==='new'?'block':'none';
 }
 
-// ─── Parse & validate exercise JSON ───────────────────────────
+// ─── Generate prompt for Claude ──────────────────────────────
+function generatePrompt(){
+  const themeVal=document.getElementById('nb-theme').value;
+  const levelVal=document.getElementById('nb-level').value;
+  const desc=document.getElementById('nb-desc').value.trim();
+  const count=document.getElementById('nb-count').value;
+  const [levelN,levelType]=levelVal.split(':');
+
+  const typeLabels={qcm:'QCM (questions à choix multiples avec 4 options)',blank:'Phrases à trous (verbe entre parenthèses à conjuguer)',order:'Remise dans l\u2019ordre (phrase correcte à reconstituer)',error:'Trouver l\u2019erreur (phrase correcte ou incorrecte)'};
+  const typeLabel=typeLabels[levelType]||levelType;
+
+  let themeDesc='', themeId='', themeTitle='';
+  if(themeVal==='new'){
+    const name=document.getElementById('nt-name').value.trim();
+    const sub=document.getElementById('nt-sub').value.trim();
+    const lex=document.getElementById('nt-lex').value.trim();
+    const icon=document.getElementById('nt-icon').value.trim()||'📝';
+    const color=document.getElementById('nt-color').value.trim()||'#4488FF';
+    if(!name){document.getElementById('ex-msg').innerHTML='<div class="alert-e">Remplis le nom du nouveau thème.</div>';return;}
+    themeId='theme-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20)+'-'+Date.now().toString(36);
+    themeTitle=name+' – '+sub;
+    themeDesc='NOUVEAU THÈME à créer avec les paramètres suivants:\n- id: "'+themeId+'"\n- name: "'+name+'"\n- sub: "'+sub+'"\n- lex: "'+lex+'"\n- icon: "'+icon+'"\n- color: "'+color+'"';
+  } else {
+    const ti=parseInt(themeVal.split(':')[1]);
+    const t=THEMES[ti];
+    themeId=t.id;
+    themeTitle=t.name+' – '+t.sub;
+    themeDesc='THÈME EXISTANT : '+t.name+' – '+t.sub+' (lexique : '+t.lex+')';
+  }
+
+  const exId='ex-'+themeId+'-l'+levelN+'-'+Date.now().toString(36);
+
+  let formatGuide='';
+  if(levelType==='qcm'){
+    formatGuide=`Format JSON attendu pour chaque question :
+{"q":"Phrase avec ___ pour le blanc","opts":["option A","option B","option C","option D"],"c":INDEX_BONNE_REPONSE,"e":"Explication courte en français"}
+(c = 0 si A est correct, 1 si B, 2 si C, 3 si D)`;
+  } else if(levelType==='blank'){
+    formatGuide=`Format JSON attendu pour chaque question :
+{"b":"Texte AVANT le verbe","h":"verbe_infinitif","a":"texte après le trou.","ans":"forme_conjuguée","e":"Explication courte en français"}`;
+  } else if(levelType==='order'){
+    formatGuide=`Format JSON attendu pour chaque question :
+{"s":"Phrase correcte et complète à reconstituer.","e":"Explication de l'ordre des mots en français"}`;
+  } else if(levelType==='error'){
+    formatGuide=`Format JSON attendu pour chaque question :
+{"s":"La phrase à évaluer.","ok":true_ou_false,"c":"Correction si incorrecte (laisser vide si correcte)","e":"Explication courte en français"}`;
+  }
+
+  const prompt=`Tu es un générateur d'exercices de grammaire anglaise pour élèves de Bac Pro 2nde (niveau A2/B1).
+
+THÈME : ${themeDesc}
+TYPE D'EXERCICE : Niveau ${levelN} – ${typeLabel}
+NOMBRE DE QUESTIONS : ${count}
+${desc?'CONSIGNES SUPPLÉMENTAIRES : '+desc:''}
+
+Génère exactement ${count} questions selon le format ci-dessous.
+${formatGuide}
+
+IMPORTANT – Règles à respecter :
+- Toutes les explications (champ "e") sont en FRANÇAIS, simples et courtes (max 15 mots)
+- Les phrases anglaises doivent être correctes et adaptées au niveau bac pro
+- Utilise un vocabulaire varié en lien avec le thème
+- Ne répète pas les mêmes structures
+- Chaque question doit tester une règle grammaticale claire
+
+Réponds UNIQUEMENT avec le JSON ci-dessous, sans explication ni commentaire, sans balises markdown :
+
+{
+  "id": "${exId}",
+  "title": "Niveau ${levelN} – ${typeLabel.split('(')[0].trim()} – ${themeTitle}",
+  "qs": [
+    ... (${count} objets selon le format ci-dessus)
+  ]
+}`;
+
+  document.getElementById('prompt-text').value=prompt;
+  document.getElementById('prompt-output').style.display='block';
+  document.getElementById('ex-msg').innerHTML='';
+  document.getElementById('prompt-text').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function copyPrompt(){
+  const txt=document.getElementById('prompt-text');
+  txt.select();
+  try{
+    document.execCommand('copy');
+    document.getElementById('copy-msg').textContent='✅ Prompt copié ! Collez-le dans Claude.';
+    setTimeout(()=>{const m=document.getElementById('copy-msg');if(m)m.textContent='';},3000);
+  }catch(e){
+    navigator.clipboard.writeText(txt.value).then(()=>{
+      document.getElementById('copy-msg').textContent='✅ Prompt copié !';
+      setTimeout(()=>{const m=document.getElementById('copy-msg');if(m)m.textContent='';},3000);
+    });
+  }
+}
+
+// ─── Parse JSON from Claude ───────────────────────────────────
 function parseExJSON(){
   const json=document.getElementById('exjson').value.trim();
   if(!json)throw new Error('Le champ JSON est vide.');
-  const ex=JSON.parse(json);
+  // Strip markdown code blocks if present
+  const cleaned=json.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+  const ex=JSON.parse(cleaned);
   if(!ex.id||!ex.title||!Array.isArray(ex.qs)||ex.qs.length===0)
     throw new Error('Format invalide : id, title et qs (tableau non vide) sont requis.');
   return ex;
 }
 
-// ─── Preview exercise before export ───────────────────────────
-function previewExercise(){
-  const preview=document.getElementById('ex-preview');
-  const msg=document.getElementById('ex-msg');
-  try{
-    const ex=parseExJSON();
-    const ti=parseInt(document.getElementById('ex-theme').value);
-    const li=parseInt(document.getElementById('ex-level').value)-1;
-    const t=THEMES[ti];const l=t.levels[li];
-    let rows=ex.qs.slice(0,3).map((q,i)=>{
-      let txt='';
-      if(q.q)txt=q.q;
-      else if(q.b!==undefined)txt=(q.b?q.b+' ':'')+' ('+q.h+') ___ '+q.a;
-      else if(q.s)txt=q.s+(q.ok!==undefined?' ['+(q.ok?'✓':'✗')+']':'');
-      return`<div style="font-size:.42rem;color:var(--text-dim);padding:.4rem 0;border-bottom:1px solid #222">${i+1}. ${txt}</div>`;
-    }).join('');
-    if(ex.qs.length>3)rows+=`<div style="font-size:.38rem;color:var(--text-dim);padding:.3rem 0">...et ${ex.qs.length-3} question(s) de plus</div>`;
-    preview.innerHTML=`
-      <div style="background:#041408;border:2px solid var(--green);padding:.8rem;margin-top:.5rem">
-        <div style="font-size:.5rem;color:var(--green);margin-bottom:.5rem">✅ Prévisualisation : ${ex.title}</div>
-        <div style="font-size:.4rem;color:var(--text-dim);margin-bottom:.5rem">Cible : ${t.icon} ${t.name} – ${t.sub} · Niveau ${l.n} · ${ex.qs.length} question(s)</div>
-        ${rows}
-        <div style="font-size:.4rem;color:var(--gold);margin-top:.5rem">👆 Si c’est correct, cliquez sur "Intégrer & Télécharger"</div>
-      </div>`;
-    msg.innerHTML='';
-  }catch(e){
-    preview.innerHTML='';
-    msg.innerHTML='<div class="msg-err">❌ Erreur : '+e.message+'</div>';
-  }
-}
-
-// ─── Add exercise and export full new index.html ───────────────
+// ─── Integrate exercise and export new index.html ─────────────
 function addAndExport(){
   const msg=document.getElementById('ex-msg');
   try{
     const ex=parseExJSON();
-    const ti=parseInt(document.getElementById('ex-theme').value);
-    const li=parseInt(document.getElementById('ex-level').value)-1;
+    const themeVal=document.getElementById('nb-theme').value;
+    const levelVal=document.getElementById('nb-level').value;
+    const [levelN]=levelVal.split(':');
+    const ln=parseInt(levelN);
 
-    // Check for duplicate id
-    const existing=THEMES[ti].levels[li].exs.find(e=>e.id===ex.id);
-    if(existing)throw new Error('Un exercice avec l\'id "'+ex.id+'" existe déjà dans ce niveau. Choisissez un id unique.');
+    let targetThemeIdx=-1;
+    if(themeVal==='new'){
+      // Build a new theme from the form
+      const name=document.getElementById('nt-name').value.trim();
+      const sub=document.getElementById('nt-sub').value.trim();
+      const lex=document.getElementById('nt-lex').value.trim();
+      const icon=document.getElementById('nt-icon').value.trim()||'📝';
+      const color=document.getElementById('nt-color').value.trim()||'#4488FF';
+      if(!name)throw new Error('Le nom du nouveau thème est obligatoire.');
+      const newThemeId='theme-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
+      const typeLabels=['QCM – Choix multiples','Phrases à trous','Remettre dans l\u2019ordre','Trouver l\u2019erreur'];
+      const typeKeys=['qcm','blank','order','error'];
+      const descLabels=['Choisis la bonne réponse','Conjugue le verbe','Remets les mots en ordre','Correcte ou incorrecte ?'];
+      const newTheme={
+        id:newThemeId,name,sub,lex,icon,color,
+        levels:[1,2,3,4].map(n=>({
+          n,type:typeKeys[n-1],label:typeLabels[n-1],badge:['⚙️','🪨','🥇','💎'][n-1],
+          bc:['stone','iron','gold','diamond'][n-1],
+          desc:descLabels[n-1],
+          exs:n===ln?[ex]:[]
+        }))
+      };
+      THEMES.push(newTheme);
+      targetThemeIdx=THEMES.length-1;
+    } else {
+      targetThemeIdx=parseInt(themeVal.split(':')[1]);
+      const lvl=THEMES[targetThemeIdx].levels.find(l=>l.n===ln);
+      if(!lvl)throw new Error('Niveau '+ln+' introuvable dans ce thème.');
+      if(lvl.exs.find(e=>e.id===ex.id))throw new Error('Un exercice avec l\u2019id "'+ex.id+'" existe déjà.');
+      lvl.exs.push(ex);
+    }
 
-    // Add to runtime THEMES (so serialization includes it)
-    THEMES[ti].levels[li].exs.push(ex);
-
-    // Serialize updated THEMES to JSON
+    // Serialize and rebuild HTML
     const themesJSON=JSON.stringify(THEMES,null,0);
-
-    // Grab the full current page source
     const fullHTML=document.documentElement.outerHTML;
-
-    // Replace the THEMES= definition in the source
-    // We find the marker comment and replace until the closing ];
-    const marker='const THEMES=';
-    const startIdx=fullHTML.indexOf(marker);
-    if(startIdx===-1)throw new Error('Marqueur THEMES introuvable dans le source.');
-
-    // Find the matching ]; that closes THEMES — walk bracket depth
-    let depth=0,i=startIdx+marker.length,found=-1;
+    const marker='const THEMES=JSON.parse(';
+    const si=fullHTML.indexOf(marker);
+    if(si===-1)throw new Error('Marqueur THEMES introuvable.');
+    let depth=0,i=si+marker.length,ei=-1;
     while(i<fullHTML.length){
-      if(fullHTML[i]==='[')depth++;
-      else if(fullHTML[i]===']'){depth--;if(depth===0){found=i;break;}}
+      if(fullHTML[i]==='(')depth++;
+      else if(fullHTML[i]===')'){if(depth===0){ei=i;break;}depth--;}
       i++;
     }
-    if(found===-1)throw new Error('Structure THEMES non trouvée.');
+    if(ei===-1)throw new Error('Structure THEMES non trouvée.');
+    const safeStr=JSON.stringify(themesJSON);
+    const newHTML=fullHTML.slice(0,si)+marker+safeStr+fullHTML.slice(ei+1);
 
-    const newHTML=fullHTML.slice(0,startIdx)+marker+themesJSON+fullHTML.slice(found+1);
-
-    // Download as index.html
     const blob=new Blob([newHTML],{type:'text/html;charset=utf-8'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -929,17 +1022,12 @@ function addAndExport(){
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
 
-    msg.innerHTML=`<div class="msg-ok" style="line-height:2.2">
-      ✅ <strong>${ex.title}</strong> intégré avec succès !<br>
-      📥 Le nouveau <strong>index.html</strong> a été téléchargé.<br>
-      🚀 Déposez-le sur GitHub → Vercel le redéploie → les élèves voient les nouveaux exercices !
-    </div>`;
-    document.getElementById('ex-preview').innerHTML='';
+    msg.innerHTML='<div class="alert-o">✅ <strong>'+ex.title+'</strong> intégré !<br>📥 Nouveau index.html téléchargé.<br>🚀 Remplacez-le sur GitHub → les élèves voient les nouveaux exercices.</div>';
     document.getElementById('exjson').value='';
+    document.getElementById('prompt-output').style.display='none';
 
   }catch(e){
-    // If we added the exercise before the error, remove it
-    msg.innerHTML='<div class="msg-err">❌ Erreur : '+e.message+'</div>';
+    msg.innerHTML='<div class="alert-e">❌ Erreur : '+e.message+'</div>';
   }
 }
 
@@ -958,8 +1046,6 @@ function identifyStudent(){
   if(fn.length>2)fn=fn.slice(0,2);if(ln.length>2)ln=ln.slice(0,2);
   const id=fn+'_'+ln+'_'+cls;
   S.student={id,fn,ln,cls};
-  // Save student
-  const stus=getStudents();stus[id]={fn,ln,cls,lastSeen:new Date().toLocaleDateString('fr-FR')};saveStudents(stus);
   // Load their progress
   if(!S.progress[id])S.progress[id]={};
   toast('🎮 Bienvenue, '+fn+' '+ln+' !');
