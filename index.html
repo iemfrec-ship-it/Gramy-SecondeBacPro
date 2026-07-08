@@ -288,8 +288,6 @@ let S = {
 // ─── LocalStorage helpers ──────────────────────────────────────
 function saveProgress(){try{localStorage.setItem('gramy_progress',JSON.stringify(S.progress));}catch(e){}}
 function loadProgress(){try{const d=localStorage.getItem('gramy_progress');if(d)S.progress=JSON.parse(d);}catch(e){}}
-function getStudentCode(){return localStorage.getItem('gramy_student_code')||'1234';}
-function setStudentCode(c){localStorage.setItem('gramy_student_code',c);}
 
 // progress for a student: progress[studentId][themeId][levelN][exId] = {score,total,answers}
 function getExProgress(sid,tid,ln,eid){
@@ -425,100 +423,22 @@ teacher_login:()=>`
 
 // ─── TEACHER DASHBOARD ────────────────────────────────────────
 teacher_dash:()=>{
-  const studentCode=getStudentCode();
   return`
 <div class="back" onclick="navigate('home')">Accueil</div>
-<div class="pg-h"><h1>🧑‍🏫 Tableau de bord</h1><p>Gestion des accès et des exercices</p></div>
+<div class="pg-h"><h1>🧑‍🏫 Tableau de bord</h1><p>Espace professeur</p></div>
 
 <div class="t-sec">
-  <div class="t-sec-h">🔑 Code d'accès élèves</div>
-  <p style="font-size:13px;color:var(--text-dim);margin-bottom:1rem">Code actuel : <span style="font-family:var(--font-h);color:#FFD700;font-size:1.1rem;letter-spacing:.1em">${studentCode}</span></p>
-  <div class="fg-row">
-    <div class="fg"><label class="lbl">Nouveau code</label><input type="text" id="newcode" maxlength="8" value="${studentCode}" placeholder="ex: 2025"></div>
-    <div style="display:flex;align-items:flex-end;margin-bottom:1.1rem"><button class="btn btn-o" onclick="changeStudentCode()">Enregistrer</button></div>
+  <div class="t-sec-h">🔑 Code d’accès élèves</div>
+  <div class="info-box">
+    Code d’accès : <span style="font-family:var(--font-h);color:#FFD700;font-size:1.1rem;letter-spacing:.12em">GRAMY2627</span><br>
+    <span style="font-size:12px;color:var(--text-dim)">Ce code est identique sur tous les appareils. Communiquez-le à vos élèves.</span>
   </div>
-  <div id="code-msg"></div>
 </div>
 
 <div class="t-sec">
-  <div class="t-sec-h">➕ Créer des exercices avec Claude</div>
-
-  <div class="info-box" style="margin-bottom:1.25rem">
-    <strong style="color:var(--text)">Workflow en 4 étapes :</strong><br>
-    1️⃣ Remplissez le formulaire ci-dessous &amp; cliquez <em>Générer le prompt</em><br>
-    2️⃣ Copiez le prompt et envoyez-le à Claude dans votre conversation<br>
-    3️⃣ Claude vous renvoie un JSON → copiez-le<br>
-    4️⃣ Collez-le dans la zone ci-dessous → Téléchargez index.html → remplacez sur GitHub
-  </div>
-
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
-    <div class="fg" style="margin:0">
-      <label class="lbl">Thème cible</label>
-      <select id="nb-theme" style="font-size:13px;padding:10px" onchange="toggleNewTheme()">
-        ${THEMES.map((t,i)=>`<option value="existing:${i}">${t.icon} ${t.name} – ${t.sub}</option>`).join('')}
-        <option value="new">✨ Nouveau thème…</option>
-      </select>
-    </div>
-    <div class="fg" style="margin:0">
-      <label class="lbl">Niveau / Type d'exercice</label>
-      <select id="nb-level" style="font-size:13px;padding:10px">
-        <option value="1:qcm">Niveau 1 – QCM (4 choix)</option>
-        <option value="2:blank">Niveau 2 – Phrases à trous</option>
-        <option value="3:order">Niveau 3 – Remettre dans l'ordre</option>
-        <option value="4:error">Niveau 4 – Trouver l'erreur</option>
-      </select>
-    </div>
-  </div>
-
-  <div id="new-theme-fields" style="display:none;background:rgba(68,136,255,0.06);border:1px solid rgba(68,136,255,0.15);border-radius:10px;padding:1rem;margin-bottom:1rem">
-    <div style="font-size:12px;color:var(--neon);margin-bottom:.75rem;font-weight:500;text-transform:uppercase;letter-spacing:.07em">Informations du nouveau thème</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
-      <div class="fg" style="margin:0"><label class="lbl">Nom du thème</label><input id="nt-name" placeholder="ex: Futur simple" style="font-size:14px"></div>
-      <div class="fg" style="margin:0"><label class="lbl">Sous-titre</label><input id="nt-sub" placeholder="ex: Forme affirmative" style="font-size:14px"></div>
-      <div class="fg" style="margin:0"><label class="lbl">Lexique / champ sémantique</label><input id="nt-lex" placeholder="ex: 🌍 Environnement" style="font-size:14px"></div>
-      <div class="fg" style="margin:0"><label class="lbl">Icône emoji</label><input id="nt-icon" placeholder="🌍" style="font-size:18px;text-align:center" maxlength="4"></div>
-    </div>
-    <div style="margin-top:.75rem">
-      <label class="lbl">Couleur néon</label>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.4rem;align-items:center">
-        ${['#00F5FF','#FF2090','#A040FF','#FF8C00','#FF3355','#FFD700','#00FF88','#4488FF','#FF6EC7','#39FF14'].map(col=>`<div onclick="document.getElementById('nt-color').value='${col}'" style="width:26px;height:26px;background:${col};border-radius:6px;cursor:pointer;border:2px solid rgba(255,255,255,0.15)"></div>`).join('')}
-        <input id="nt-color" placeholder="#4488FF" maxlength="7" style="width:90px;font-size:13px;padding:5px 8px;text-align:center">
-      </div>
-    </div>
-  </div>
-
-  <div class="fg">
-    <label class="lbl">Sujet et consignes pour Claude</label>
-    <textarea id="nb-desc" style="height:80px;font-size:14px;resize:vertical" placeholder="ex: Créer des questions sur le futur simple avec le vocabulaire de l'environnement (pollution, recyclage...). Public : élèves de bac pro 2nde."></textarea>
-  </div>
-
-  <div class="fg" style="margin-bottom:1rem">
-    <label class="lbl">Nombre de questions</label>
-    <select id="nb-count" style="font-size:13px;padding:10px;width:auto">
-      <option value="10">10 questions</option>
-      <option value="15" selected>15 questions</option>
-      <option value="20">20 questions</option>
-    </select>
-  </div>
-
-  <button class="btn btn-p" onclick="generatePrompt()">📋 Générer le prompt pour Claude</button>
-
-  <div id="prompt-output" style="display:none;margin-top:1rem">
-    <label class="lbl">Prompt à copier — envoyez-le à Claude dans votre conversation :</label>
-    <div style="position:relative;margin-top:.4rem">
-      <textarea id="prompt-text" readonly style="height:200px;font-size:12px;font-family:monospace;background:rgba(0,0,0,0.3);color:#C8D8FF;border-color:rgba(68,136,255,0.3);resize:vertical;padding-right:100px"></textarea>
-      <button class="btn btn-o btn-sm" onclick="copyPrompt()" style="position:absolute;top:.5rem;right:.5rem">📋 Copier</button>
-    </div>
-    <div id="copy-msg" style="font-size:12px;color:#00FF88;margin-top:.3rem;min-height:16px"></div>
-  </div>
-
-  <div style="margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1.25rem">
-    <label class="lbl">Coller le JSON renvoyé par Claude :</label>
-    <textarea id="exjson" style="height:120px;font-family:monospace;font-size:.82rem;resize:vertical;margin-top:.4rem" placeholder="Collez ici le JSON que Claude vous a fourni…"></textarea>
-    <div style="margin-top:.75rem">
-      <button class="btn btn-ok" onclick="addAndExport()">⬇ Intégrer &amp; Télécharger le nouveau index.html</button>
-    </div>
-    <div id="ex-msg" style="margin-top:.75rem"></div>
+  <div class="t-sec-h">📝 Ajouter des exercices</div>
+  <div class="info-box">
+    Pour ajouter des exercices, revenez dans la conversation Claude, demandez la génération du JSON selon le format de l’application, puis intégrez-le directement dans le fichier <strong>index.html</strong> avant de redéployer sur GitHub.
   </div>
 </div>
 
@@ -526,18 +446,23 @@ teacher_dash:()=>{
   <button class="btn btn-m" onclick="navigate('home')">← Retour accueil</button>
 </div>`;},
 
+
+
 // ─── STUDENT LOGIN ────────────────────────────────────────────
 student_login:()=>`
 <div class="back" onclick="navigate('home')">Accueil</div>
 <div class="login-box">
   <div class="login-t">🧑‍🎓 Espace Élève</div>
+  <div style="text-align:center;margin-bottom:1.5rem">
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:.5rem;text-transform:uppercase;letter-spacing:.07em">Entrez le code fourni par votre professeur</div>
+  </div>
   <div class="fg">
-    <label class="lbl">Code d'accès (donné par le prof)</label>
-    <input type="text" id="scode" placeholder="ex: 1234" maxlength="8" onkeydown="if(event.key==='Enter')studentLogin()">
+    <label class="lbl">Code d'accès</label>
+    <input type="text" id="scode" placeholder="" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" style="text-align:center;font-family:var(--font-h);font-size:1.1rem;letter-spacing:.12em" onkeydown="if(event.key==='Enter')studentLogin()">
   </div>
   <div id="smsg"></div>
   <div style="margin-top:1rem">
-    <button class="btn btn-p btn-lg" style="width:100%;--neon:#FF2090;background:var(--neon);border-color:var(--neon)" onclick="studentLogin()">Entrer dans la zone →</button>
+    <button class="btn btn-p btn-lg" style="width:100%" onclick="studentLogin()">Entrer →</button>
   </div>
 </div>`,
 
@@ -572,7 +497,7 @@ student_identify:()=>`
 themes:()=>{
   const sid=S.student.id;applyNeon(-1);
   return`
-<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span><button class="btn btn-sm btn-m" onclick="navigate('bilan')">📊 Mon bilan</button></div>
+<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span><button class="btn btn-sm btn-m" onclick="navigate('bilan')">📊 Mon bilan</button><button class="btn btn-sm btn-o" onclick="generatePDF()" style="margin-left:.5rem">📄 PDF</button></div>
 <div class="pg-h"><h1>Choisis ton thème</h1><p>Complète les 4 niveaux de chaque thème pour maîtriser la grammaire !</p></div>
 <div class="th-grid">
 ${THEMES.map((t,i)=>{
@@ -602,7 +527,7 @@ levels:()=>{
   const nCls=['n1','n2','n3','n4'];
   return`
 <div class="back" onclick="navigate('themes')">Thèmes</div>
-<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span></div>
+<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span><button class="btn btn-sm btn-o" onclick="generatePDF()" style="margin-left:.4rem">📄 PDF</button></div>
 <div class="pg-h" style="border-left:3px solid var(--neon);padding-left:1rem">
   <h1>${t.icon} ${t.name}</h1>
   <p>${t.sub} · ${t.lex}</p>
@@ -692,7 +617,7 @@ exercise:()=>{
 
   return`
 <div class="back" onclick="confirmLeave()">Quitter l’exercice</div>
-<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span></div>
+<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span><button class="btn btn-sm btn-o" onclick="generatePDF()" style="margin-left:.4rem">📄 PDF</button></div>
 <div class="ex-hdr">
   <div class="ex-lbl">${S.theme.icon} ${ex.title}</div>
   <div class="ex-ctr">Question ${S.qIdx+1} / ${total}</div>
@@ -727,7 +652,7 @@ score_screen:()=>{
   <div class="btn-row">
     <button class="btn btn-o" onclick="navigate('corrections')">📋 Voir la correction</button>
     ${nextUnlocked?`<button class="btn btn-ok" onclick="navigate('levels',{theme:S.theme})">⬆ Niveau ${S.level.n+1} débloqué !</button>`:''}
-    <button class="btn btn-p" onclick="navigate('themes')">Choisir un thème</button>
+    <button class="btn btn-o" onclick="generatePDF()">📄 Télécharger PDF</button><button class="btn btn-p" onclick="navigate('themes')">Choisir un thème</button>
     <button class="btn btn-m" onclick="navigate('bilan')">📊 Mon bilan</button>
   </div>
 </div>`;},
@@ -754,7 +679,7 @@ corrections:()=>{
 <div class="pg-h"><h1>📋 Correction complète</h1><p>${ex.title} · ${score}/${ex.qs.length} points</p></div>
 <div class="corr-list">${items}</div>
 <div class="btn-row" style="justify-content:flex-start;margin-top:1.5rem">
-  <button class="btn btn-p" onclick="navigate('themes')">Choisir un thème</button>
+  <button class="btn btn-o" onclick="generatePDF()">📄 Télécharger PDF</button><button class="btn btn-p" onclick="navigate('themes')">Choisir un thème</button>
   <button class="btn btn-m" onclick="navigate('bilan')">📊 Mon bilan</button>
 </div>`;},
 
@@ -795,7 +720,7 @@ bilan:()=>{
   }).join('');
   return`
 <div class="back" onclick="navigate('themes')">Thèmes</div>
-<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span></div>
+<div class="stu-bar"><span>👤 <span class="sn">${S.student.fn} ${S.student.ln}</span></span><span class="sc">🏫 ${S.student.cls}</span><button class="btn btn-sm btn-o" onclick="generatePDF()" style="margin-left:.4rem">📄 PDF</button></div>
 <div class="pg-h"><h1>📊 Mon bilan complet</h1><p>Récapitulatif de ta progression</p></div>
 <div class="bl-stats">
   <div class="bl-stat"><span class="bv">${totSc}</span><span class="bl">Points totaux</span></div>
@@ -811,18 +736,19 @@ ${secs}
 // ─── RGPD ─────────────────────────────────────────────────────
 rgpd:()=>`
 <div class="back" onclick="navigate('home')">Accueil</div>
-<div class="pg-h"><h1>📜 Mentions RGPD</h1></div>
+<div class="pg-h"><h1>📜 Protection des données personnelles</h1></div>
 <div class="card rgpd-c">
-  <h2>Collecte des données</h2>
-  <p>Cette application collecte et stocke localement (sur votre appareil) des données d'identification anonymisées : initiales du prénom et du nom, nom de classe, et résultats aux exercices. Aucune donnée n’est transmise à des serveurs externes.</p>
-  <h2>Données stockées</h2>
-  <p>Les données sont enregistrées dans le stockage local (localStorage) de votre navigateur. Elles restent sur votre appareil et ne sont pas partagées.</p>
+  <p>Cette application est un outil pédagogique développé pour un usage en classe.</p>
+  <h2>Aucune transmission de données</h2>
+  <p>Aucune donnée n’est transmise à un serveur externe : toutes les informations (identifiant, réponses, score) restent uniquement dans la mémoire de votre navigateur, le temps de la partie en cours.</p>
+  <h2>Aucun traceur</h2>
+  <p>Aucun cookie tiers, aucun traceur publicitaire, aucun appel à une API externe n’est utilisé.</p>
+  <h2>Données saisies</h2>
+  <p>Les seules données saisies sont : les deux premières lettres de votre prénom et de votre nom (utilisées uniquement pour générer un identifiant au format XX-YY, sans jamais collecter votre identité complète), ainsi que vos réponses aux exercices.</p>
   <h2>Durée de conservation</h2>
-  <p>Les données sont conservées jusqu'à effacement manuel ou réinitialisation par l'enseignant.</p>
-  <h2>Droits</h2>
-  <p>Conformément au RGPD (Règlement EU 2016/679), vous disposez d'un droit d'accès, de rectification et d'effacement de vos données. Contactez l'enseignant responsable de l'application.</p>
-  <h2>Contact</h2>
-  <p>Cette page sera complétée avec les coordonnées de l'établissement. — Application GRAMY, créée par C. Iemfre.</p>
+  <p>Ces données ne sont jamais sauvegardées : elles disparaissent automatiquement si vous rechargez ou fermez la page. Pensez à télécharger votre PDF de résultats avant de quitter l’application.</p>
+  <h2>PDF généré localement</h2>
+  <p>Le PDF généré est créé localement dans votre navigateur ; il n’est envoyé à personne automatiquement. C’est à vous de le transmettre à votre professeur.</p>
 </div>
 <div style="margin-top:1rem"><button class="btn btn-m" onclick="navigate('home')">← Retour</button></div>`
 };
@@ -837,205 +763,11 @@ function teacherLogin(){
   else{document.getElementById('tmsg').innerHTML='<div class="msg-err">❌ Code incorrect</div>';}
 }
 
-function changeStudentCode(){
-  const c=document.getElementById('newcode').value.trim();
-  if(c.length<2){document.getElementById('code-msg').innerHTML='<div class="msg-err">Code trop court (min 2 caractères)</div>';return;}
-  setStudentCode(c);document.getElementById('code-msg').innerHTML='<div class="msg-ok">✅ Code mis à jour : '+c+'</div>';
-}
-
-function toggleNewTheme(){
-  const val=document.getElementById('nb-theme').value;
-  document.getElementById('new-theme-fields').style.display=val==='new'?'block':'none';
-}
-
-// ─── Generate prompt for Claude ──────────────────────────────
-function generatePrompt(){
-  const themeVal=document.getElementById('nb-theme').value;
-  const levelVal=document.getElementById('nb-level').value;
-  const desc=document.getElementById('nb-desc').value.trim();
-  const count=document.getElementById('nb-count').value;
-  const [levelN,levelType]=levelVal.split(':');
-
-  const typeLabels={qcm:'QCM (questions à choix multiples avec 4 options)',blank:'Phrases à trous (verbe entre parenthèses à conjuguer)',order:'Remise dans l\u2019ordre (phrase correcte à reconstituer)',error:'Trouver l\u2019erreur (phrase correcte ou incorrecte)'};
-  const typeLabel=typeLabels[levelType]||levelType;
-
-  let themeDesc='', themeId='', themeTitle='';
-  if(themeVal==='new'){
-    const name=document.getElementById('nt-name').value.trim();
-    const sub=document.getElementById('nt-sub').value.trim();
-    const lex=document.getElementById('nt-lex').value.trim();
-    const icon=document.getElementById('nt-icon').value.trim()||'📝';
-    const color=document.getElementById('nt-color').value.trim()||'#4488FF';
-    if(!name){document.getElementById('ex-msg').innerHTML='<div class="alert-e">Remplis le nom du nouveau thème.</div>';return;}
-    themeId='theme-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20)+'-'+Date.now().toString(36);
-    themeTitle=name+' – '+sub;
-    themeDesc='NOUVEAU THÈME à créer avec les paramètres suivants:\n- id: "'+themeId+'"\n- name: "'+name+'"\n- sub: "'+sub+'"\n- lex: "'+lex+'"\n- icon: "'+icon+'"\n- color: "'+color+'"';
-  } else {
-    const ti=parseInt(themeVal.split(':')[1]);
-    const t=THEMES[ti];
-    themeId=t.id;
-    themeTitle=t.name+' – '+t.sub;
-    themeDesc='THÈME EXISTANT : '+t.name+' – '+t.sub+' (lexique : '+t.lex+')';
-  }
-
-  const exId='ex-'+themeId+'-l'+levelN+'-'+Date.now().toString(36);
-
-  let formatGuide='';
-  if(levelType==='qcm'){
-    formatGuide=`Format JSON attendu pour chaque question :
-{"q":"Phrase avec ___ pour le blanc","opts":["option A","option B","option C","option D"],"c":INDEX_BONNE_REPONSE,"e":"Explication courte en français"}
-(c = 0 si A est correct, 1 si B, 2 si C, 3 si D)`;
-  } else if(levelType==='blank'){
-    formatGuide=`Format JSON attendu pour chaque question :
-{"b":"Texte AVANT le verbe","h":"verbe_infinitif","a":"texte après le trou.","ans":"forme_conjuguée","e":"Explication courte en français"}`;
-  } else if(levelType==='order'){
-    formatGuide=`Format JSON attendu pour chaque question :
-{"s":"Phrase correcte et complète à reconstituer.","e":"Explication de l'ordre des mots en français"}`;
-  } else if(levelType==='error'){
-    formatGuide=`Format JSON attendu pour chaque question :
-{"s":"La phrase à évaluer.","ok":true_ou_false,"c":"Correction si incorrecte (laisser vide si correcte)","e":"Explication courte en français"}`;
-  }
-
-  const prompt=`Tu es un générateur d'exercices de grammaire anglaise pour élèves de Bac Pro 2nde (niveau A2/B1).
-
-THÈME : ${themeDesc}
-TYPE D'EXERCICE : Niveau ${levelN} – ${typeLabel}
-NOMBRE DE QUESTIONS : ${count}
-${desc?'CONSIGNES SUPPLÉMENTAIRES : '+desc:''}
-
-Génère exactement ${count} questions selon le format ci-dessous.
-${formatGuide}
-
-IMPORTANT – Règles à respecter :
-- Toutes les explications (champ "e") sont en FRANÇAIS, simples et courtes (max 15 mots)
-- Les phrases anglaises doivent être correctes et adaptées au niveau bac pro
-- Utilise un vocabulaire varié en lien avec le thème
-- Ne répète pas les mêmes structures
-- Chaque question doit tester une règle grammaticale claire
-
-Réponds UNIQUEMENT avec le JSON ci-dessous, sans explication ni commentaire, sans balises markdown :
-
-{
-  "id": "${exId}",
-  "title": "Niveau ${levelN} – ${typeLabel.split('(')[0].trim()} – ${themeTitle}",
-  "qs": [
-    ... (${count} objets selon le format ci-dessus)
-  ]
-}`;
-
-  document.getElementById('prompt-text').value=prompt;
-  document.getElementById('prompt-output').style.display='block';
-  document.getElementById('ex-msg').innerHTML='';
-  document.getElementById('prompt-text').scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
-function copyPrompt(){
-  const txt=document.getElementById('prompt-text');
-  txt.select();
-  try{
-    document.execCommand('copy');
-    document.getElementById('copy-msg').textContent='✅ Prompt copié ! Collez-le dans Claude.';
-    setTimeout(()=>{const m=document.getElementById('copy-msg');if(m)m.textContent='';},3000);
-  }catch(e){
-    navigator.clipboard.writeText(txt.value).then(()=>{
-      document.getElementById('copy-msg').textContent='✅ Prompt copié !';
-      setTimeout(()=>{const m=document.getElementById('copy-msg');if(m)m.textContent='';},3000);
-    });
-  }
-}
-
-// ─── Parse JSON from Claude ───────────────────────────────────
-function parseExJSON(){
-  const json=document.getElementById('exjson').value.trim();
-  if(!json)throw new Error('Le champ JSON est vide.');
-  // Strip markdown code blocks if present
-  const cleaned=json.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
-  const ex=JSON.parse(cleaned);
-  if(!ex.id||!ex.title||!Array.isArray(ex.qs)||ex.qs.length===0)
-    throw new Error('Format invalide : id, title et qs (tableau non vide) sont requis.');
-  return ex;
-}
-
-// ─── Integrate exercise and export new index.html ─────────────
-function addAndExport(){
-  const msg=document.getElementById('ex-msg');
-  try{
-    const ex=parseExJSON();
-    const themeVal=document.getElementById('nb-theme').value;
-    const levelVal=document.getElementById('nb-level').value;
-    const [levelN]=levelVal.split(':');
-    const ln=parseInt(levelN);
-
-    let targetThemeIdx=-1;
-    if(themeVal==='new'){
-      // Build a new theme from the form
-      const name=document.getElementById('nt-name').value.trim();
-      const sub=document.getElementById('nt-sub').value.trim();
-      const lex=document.getElementById('nt-lex').value.trim();
-      const icon=document.getElementById('nt-icon').value.trim()||'📝';
-      const color=document.getElementById('nt-color').value.trim()||'#4488FF';
-      if(!name)throw new Error('Le nom du nouveau thème est obligatoire.');
-      const newThemeId='theme-'+name.toLowerCase().replace(/[^a-z0-9]/g,'-').slice(0,20);
-      const typeLabels=['QCM – Choix multiples','Phrases à trous','Remettre dans l\u2019ordre','Trouver l\u2019erreur'];
-      const typeKeys=['qcm','blank','order','error'];
-      const descLabels=['Choisis la bonne réponse','Conjugue le verbe','Remets les mots en ordre','Correcte ou incorrecte ?'];
-      const newTheme={
-        id:newThemeId,name,sub,lex,icon,color,
-        levels:[1,2,3,4].map(n=>({
-          n,type:typeKeys[n-1],label:typeLabels[n-1],badge:['⚙️','🪨','🥇','💎'][n-1],
-          bc:['stone','iron','gold','diamond'][n-1],
-          desc:descLabels[n-1],
-          exs:n===ln?[ex]:[]
-        }))
-      };
-      THEMES.push(newTheme);
-      targetThemeIdx=THEMES.length-1;
-    } else {
-      targetThemeIdx=parseInt(themeVal.split(':')[1]);
-      const lvl=THEMES[targetThemeIdx].levels.find(l=>l.n===ln);
-      if(!lvl)throw new Error('Niveau '+ln+' introuvable dans ce thème.');
-      if(lvl.exs.find(e=>e.id===ex.id))throw new Error('Un exercice avec l\u2019id "'+ex.id+'" existe déjà.');
-      lvl.exs.push(ex);
-    }
-
-    // Serialize and rebuild HTML
-    const themesJSON=JSON.stringify(THEMES,null,0);
-    const fullHTML=document.documentElement.outerHTML;
-    const marker='const THEMES=JSON.parse(';
-    const si=fullHTML.indexOf(marker);
-    if(si===-1)throw new Error('Marqueur THEMES introuvable.');
-    let depth=0,i=si+marker.length,ei=-1;
-    while(i<fullHTML.length){
-      if(fullHTML[i]==='(')depth++;
-      else if(fullHTML[i]===')'){if(depth===0){ei=i;break;}depth--;}
-      i++;
-    }
-    if(ei===-1)throw new Error('Structure THEMES non trouvée.');
-    const safeStr=JSON.stringify(themesJSON);
-    const newHTML=fullHTML.slice(0,si)+marker+safeStr+fullHTML.slice(ei+1);
-
-    const blob=new Blob([newHTML],{type:'text/html;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=url;a.download='index.html';
-    document.body.appendChild(a);a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    msg.innerHTML='<div class="alert-o">✅ <strong>'+ex.title+'</strong> intégré !<br>📥 Nouveau index.html téléchargé.<br>🚀 Remplacez-le sur GitHub → les élèves voient les nouveaux exercices.</div>';
-    document.getElementById('exjson').value='';
-    document.getElementById('prompt-output').style.display='none';
-
-  }catch(e){
-    msg.innerHTML='<div class="alert-e">❌ Erreur : '+e.message+'</div>';
-  }
-}
 
 function studentLogin(){
-  const code=document.getElementById('scode').value.trim();
-  const expected=getStudentCode();
-  if(code===expected){navigate('student_identify');}
-  else{document.getElementById('smsg').innerHTML='<div class="msg-err">❌ Code incorrect. Demande le code à ton professeur.</div>';}
+  const code=(document.getElementById('scode').value||'').trim().toUpperCase();
+  if(code==='GRAMY2627'){navigate('student_identify');}
+  else{document.getElementById('smsg').innerHTML='<div class="msg-err">❌ Code incorrect. Demandez le code à votre professeur.</div>';}
 }
 
 function identifyStudent(){
